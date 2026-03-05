@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="./styles/reset.css">
     <link rel="stylesheet" href="./styles/stylesheet.css">
     <script src="./scripts/home.js" defer></script>
+    <script src="./scripts/api.js"></script>
     <title>webPagina</title>
 </head>
 <body>
@@ -24,7 +25,7 @@
     </header>
     <main>
         <ul>
-            <li id="home" style="display: none;">
+            <li id="home" style="display: block;">
                 <h1>MusicMatch</h1>
                 <div class="mood">
                   <h2>kies je mood</h2>
@@ -66,8 +67,15 @@
                     </ul>
                 </div>
             </li>
-            <li>
-                
+            <li id="zoekPagina" style="display: none;">
+                <h1>Zoeken</h1>
+                <ul id="zoekBalk">
+                    <li><input type="text" placeholder="Zoek naar artiesten of nummer ..."></li>
+                    <li><button><img src="./fotos/zoekKnop.png" alt=""></button></li>
+                    <li><button>Alles</button></li>
+                    <li><button>Artiesten</button></li>
+                    <li><button>Nummer</button></li>
+                </ul>
             </li>
         </ul>
     </main>

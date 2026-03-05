@@ -133,3 +133,14 @@ footer ul li {
     color: white;
     background-color: rgb(118, 91, 205);
 }
+
+#zoekPagina h1{
+    width: 100%;
+    text-align: center;
+}
+#zoekPagina {
+    padding: 2rem;
+}
+#zoekBalk{
+   display: grid;    
+}
