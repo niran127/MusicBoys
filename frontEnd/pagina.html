@@ -25,7 +25,7 @@
     </header>
     <main>
         <ul>
-            <li id="home" style="display: block;">
+            <li id="home" style="display: none;">
                 <h1>MusicMatch</h1>
                 <div class="mood">
                   <h2>kies je mood</h2>
@@ -67,14 +67,17 @@
                     </ul>
                 </div>
             </li>
-            <li id="zoekPagina" style="display: none;">
+            <li id="zoekPagina" style="display: block;">
                 <h1>Zoeken</h1>
                 <ul id="zoekBalk">
-                    <li><input type="text" placeholder="Zoek naar artiesten of nummer ..."></li>
-                    <li><button><img src="./fotos/zoekKnop.png" alt=""></button></li>
-                    <li><button>Alles</button></li>
-                    <li><button>Artiesten</button></li>
-                    <li><button>Nummer</button></li>
+                    <li><input id="zoekVeld" type="text" placeholder="Zoek naar artiesten of nummer ..."></li>
+                    <li><button id="zoekKnop"><img src="./fotos/zoekKnop.png" alt=""></button></li>
+                    <li class="zoekSelect"><button id="alles">Alles</button></li>
+                    <li class="zoekSelect"><button id="artiesten">Artiesten</button></li>
+                    <li class="zoekSelect"><button id="nummer">Nummer</button></li>
+                </ul>
+                <h2>Resultaten</h2>
+                <ul>
                 </ul>
             </li>
         </ul>

@@ -142,5 +142,32 @@ footer ul li {
     padding: 2rem;
 }
 #zoekBalk{
-   display: grid;    
+    display: grid; 
+    grid-template-columns: 1fr 1fr 1fr 6fr 1fr;
+    gap: 1rem;
+}
+
+#zoekBalk li:first-child{
+    grid-column: span 4;
+}
+
+#zoekBalk li > input{
+    width: 100%;
+    height: 100%;
+}
+#zoekBalk li{
+    border: 1px solid gray;
+}
+
+#zoekBalk li img{
+    height: 100%;
+}
+
+#zoekBalk li button{
+    height: 100%;
+    width: 100%;
+}
+
+.zoekSelect{
+    height: 3rem;
 }
