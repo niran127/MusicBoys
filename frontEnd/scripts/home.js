@@ -11,6 +11,9 @@ const nummer = document.getElementById("nummer");
 const zoekKnop = document.getElementById("zoekKnop");
 const zoekVeld = document.getElementById("zoekVeld");
 
+const resultaten = document.getElementById("resultaten");
+let data;
+
 let zoekInstelling;
 
 const clientId = '7c5773b9dcc149b38a50f1d7d83c34a7';
@@ -45,7 +48,7 @@ async function getArtiest(naamArtiest,zoekInstelling ) {
 
         const data = await response.json();
 
-        console.log(data);
+        return data;
         
     } catch (error) {
         console.error("Technische fout:", error);
@@ -128,6 +131,20 @@ nummer.addEventListener('click',()=>{
     zoekInstelling = "track";
 });
 
-zoekKnop.addEventListener('click',()=>{
-    getArtiest(zoekVeld.value,zoekInstelling);
+zoekKnop.addEventListener('click',async()=>{
+    data = await getArtiest(zoekVeld.value,zoekInstelling);
+    console.log(data);
+    resultaten.innerHTML = data.artists.items.map((el)=>`
+        <li>
+            <div>
+                <div></div>
+                <img src="${el.images[0].url}" alt="">
+                <div>
+                    <h3>${el.name}</h3>
+                    <h4>${el.type}</h4>
+                </div>
+            </div>
+            <div><button>play</button><button>like</button></div>
+        </li>
+    `).join("");
 })

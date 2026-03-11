@@ -41,8 +41,9 @@ header ul li:last-child img {
 }
 
 main{
-    max-height: 80vh;
+    margin: 0;
     width: 100vw;
+    padding-bottom: 20vh;
 }
 #home{
     padding: 2rem;
@@ -100,6 +101,12 @@ main{
 footer{
     height: 10vh;
     border-top: 1px solid black;
+    position: fixed;
+    bottom: 0;         /* Plak aan de bovenkant */
+    left: 0;        /* Plak aan de linkerkant */
+    width: 100%;    /* Zorg dat hij de hele breedte pakt */
+    z-index: 1000;  /* Zorgt dat hij bovenop andere elementen ligt */
+    background-color: white;
 }
 
 footer ul{
@@ -170,4 +177,54 @@ footer ul li {
 
 .zoekSelect{
     height: 3rem;
+}
+
+#resultaten >li  > div:first-child{
+    display: flex;
+    align-items: center; 
+    gap: 15px;           
+    padding: 10px;
+    div:first-child{
+        background-color: gray;
+        width: 1rem;
+        height: 1rem;
+        border:1px solid black;
+    }
+    > img{
+        background-color: gray;
+        border: 1px solid black;
+        width: 3rem;
+        height: 3rem;
+    }
+    > div:last-child > h4{
+        color: gray;
+        font-size:x-small;
+        font-weight: lighter;
+        margin-top: 5px;
+    }
+    button{
+        position: relative;
+        right: 0px;
+    }
+}
+
+#resultaten > li{
+    margin-top: 1rem;
+    border: 1px solid #ccc;
+    display: grid;
+    grid-template-columns: 6fr 1fr;
+}
+
+#resultaten>li > div:last-child{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    padding: 1rem;
+    button{
+        height: 2rem;
+        width: 3rem;
+        margin-top: auto;
+        margin-bottom: auto;
+        border: 0.5px solid black;
+    }
 }
