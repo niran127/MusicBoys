@@ -664,7 +664,7 @@ footer {
 
 .progress-fill {
   height: 100%;
-  width: 0%;
+  width: 67%;
   background: linear-gradient(90deg, var(--accent), var(--accent2));
   border-radius: 2px;
   position: relative;
@@ -700,6 +700,7 @@ footer {
   display: flex;
   align-items: center;
   gap: 8px;
+  position: relative;
 }
 
 .vol-bar {
@@ -708,15 +709,15 @@ footer {
   background: var(--border);
   border-radius: 2px;
   cursor: pointer;
+  position: relative;
 }
 
 .vol-fill {
   height: 100%;
-  width: 65%;
+  width: 38%;
   background: var(--text-dim);
   border-radius: 2px;
 }
-
 ::-webkit-scrollbar {
   width: 6px;
 }
