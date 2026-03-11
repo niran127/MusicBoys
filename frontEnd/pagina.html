@@ -6,7 +6,6 @@
     <link rel="stylesheet" href="./styles/reset.css">
     <link rel="stylesheet" href="./styles/stylesheet.css">
     <script src="./scripts/home.js" defer></script>
-    <script src="./scripts/api.js"></script>
     <title>webPagina</title>
 </head>
 <body>
@@ -25,7 +24,7 @@
     </header>
     <main>
         <ul>
-            <li id="home" style="display: none;">
+            <li id="home" style="display: block;">
                 <h1>MusicMatch</h1>
                 <div class="mood">
                   <h2>kies je mood</h2>
@@ -67,72 +66,17 @@
                     </ul>
                 </div>
             </li>
-            <li id="zoekPagina" style="display: block;">
+            <li id="zoekPagina" style="display: none;">
                 <h1>Zoeken</h1>
                 <ul id="zoekBalk">
                     <li><input id="zoekVeld" type="text" placeholder="Zoek naar artiesten of nummer ..."></li>
                     <li><button id="zoekKnop"><img src="./fotos/zoekKnop.png" alt=""></button></li>
-                    <li class="zoekSelect"><button id="alles">Alles</button></li>
+                    <li class="zoekSelect"><button id="alles" class="selecteerd">Alles</button></li>
                     <li class="zoekSelect"><button id="artiesten">Artiesten</button></li>
                     <li class="zoekSelect"><button id="nummer">Nummer</button></li>
                 </ul>
                 <h2>Resultaten</h2>
                 <ul id="resultaten">
-                    <li>
-                        <div>
-                            <div></div>
-                            <img src="" alt="">
-                            <div>
-                                <h3>Ren</h3>
-                                <h4>Muziek schrijver</h4>
-                            </div>
-                        </div>
-                        <div><button>play</button><button>like</button></div>
-                    </li>
-                    <li>
-                        <div>
-                            <div></div>
-                            <img src="" alt="">
-                            <div>
-                                <h3></h3>
-                                <h4></h4>
-                            </div>
-                        </div>
-                        <div class="actions"><button></button><button></button></div>
-                    </li>
-                    <li>
-                        <div>
-                            <div></div>
-                            <img src="" alt="">
-                            <div>
-                                <h3></h3>
-                                <h4></h4>
-                            </div>
-                        </div>
-                        <div class="actions"><button></button><button></button></div>
-                    </li>
-                    <li>
-                        <div>
-                            <div></div>
-                            <img src="" alt="">
-                            <div>
-                                <h3></h3>
-                                <h4></h4>
-                            </div>
-                        </div>
-                        <div class="actions"><button></button><button></button></div>
-                    </li>
-                    <li>
-                        <div>
-                            <div></div>
-                            <img src="" alt="">
-                            <div>
-                                <h3></h3>
-                                <h4></h4>
-                            </div>
-                        </div>
-                        <div class="actions"><button></button><button></button></div>
-                    </li>
                 </ul>
             </li>
         </ul>
@@ -140,20 +84,19 @@
     <footer>
         <ul>
             <li>
-                <div></div>
-                <div>home</div>
+                <div id="homeKnop" class="aanwezig"><img src="./fotos/home.svg" alt=""></div>
+                <div>Home</div>
             </li>
             <li>
-                <div>
-                </div>
+                <div id="zoekenKnop"><img src="./fotos/search.svg" alt=""></div>
                 <div>Zoeken</div>
             </li>
             <li>
-                <div></div>
-                <div>collectie</div>
+                <div id="collectieKnop"><img src="./fotos/collection.svg" alt=""></div>
+                <div>Collectie</div>
             </li>
             <li>
-                <div></div>
+                <div id="gameKnop"><img src="./fotos/game.svg" alt=""></div>
                 <div>Game</div>
             </li>
         </ul>

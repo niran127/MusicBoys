@@ -116,10 +116,14 @@ footer ul{
     height: 10vh;
 }
 footer ul div:first-child{
-    background-color: gray;
+    
     border-radius: 50%;
     width: 1.5rem;
     height: 1.5rem;
+}
+
+footer ul div:first-child:hover{
+    cursor: pointer;
 }
 footer ul li {
     display: flex;
@@ -227,4 +231,9 @@ footer ul li {
         margin-bottom: auto;
         border: 0.5px solid black;
     }
+}
+
+
+.aanwezig{
+    background-color: rgb(118, 91, 205);
 }

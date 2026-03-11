@@ -11,10 +11,15 @@ const nummer = document.getElementById("nummer");
 const zoekKnop = document.getElementById("zoekKnop");
 const zoekVeld = document.getElementById("zoekVeld");
 
+const homeKnop = document.getElementById("homeKnop");
+const zoekenKnop = document.getElementById("zoekenKnop");
+const home = document.getElementById("home");
+const zoekPagina = document.getElementById("zoekPagina");
+
 const resultaten = document.getElementById("resultaten");
 let data;
 
-let zoekInstelling;
+let zoekInstelling = "artist,track";
 
 const clientId = '7c5773b9dcc149b38a50f1d7d83c34a7';
 const clientSecret = 'f9a584351aac45889f29e806274d73c4';
@@ -53,6 +58,15 @@ async function getArtiest(naamArtiest,zoekInstelling ) {
     } catch (error) {
         console.error("Technische fout:", error);
     }
+}
+
+function getSimilarityScore(text, search) {
+  if (text === search) return 100;      // Exacte match (hoogste prio)
+  if (text.startsWith(search)) return 80; // Begint met de zoekterm
+  if (text.includes(search)) return 50;   // Zoekterm zit er ergens in
+  
+  // Optioneel: geef punten voor kortere namen (relevanter)
+  return 0; 
 }
 
 
@@ -134,7 +148,8 @@ nummer.addEventListener('click',()=>{
 zoekKnop.addEventListener('click',async()=>{
     data = await getArtiest(zoekVeld.value,zoekInstelling);
     console.log(data);
-    resultaten.innerHTML = data.artists.items.map((el)=>`
+    if(zoekInstelling === "artist"){
+        resultaten.innerHTML = data.artists.items.map((el)=>`
         <li>
             <div>
                 <div></div>
@@ -147,4 +162,84 @@ zoekKnop.addEventListener('click',async()=>{
             <div><button>play</button><button>like</button></div>
         </li>
     `).join("");
-})
+    }
+    else if(zoekInstelling === "track"){
+        resultaten.innerHTML = data.tracks.items.map((el)=>`
+        <li>
+            <div>
+                <div></div>
+                <img src="${el.album.images[0].url}" alt="">
+                <div>
+                    <h3>${el.name}</h3>
+                    <h4>${el.type}</h4>
+                </div>
+            </div>
+            <div><button>play</button><button>like</button></div>
+        </li>
+        `).join("");
+    }
+    else if(zoekInstelling === "artist,track"){
+        const allItems = [...data.artists.items,...data.tracks.items];
+
+        allItems.sort((a,b)=>{
+            const nameA = a.name.toLowerCase();
+            const nameB = b.name.toLowerCase();
+            const query = zoekVeld.value.toLowerCase();
+
+            const scoreA = getSimilarityScore(nameA, query);
+            const scoreB = getSimilarityScore(nameB,query);
+
+            if(scoreA != scoreB){
+                return scoreB - scoreA;
+            }
+            return (b.popularity || 0) - (a.popularity || 0);
+        });
+         resultaten.innerHTML = allItems.map((el)=>{
+            if(el.type === 'artist'){
+            return(`
+                 <li>
+                <div>
+                    <div></div>
+                    <img src="${el.images[0].url}" alt="">
+                    <div>
+                        <h3>${el.name}</h3>
+                        <h4>${el.type}</h4>
+                    </div>
+                </div>
+                <div><button>play</button><button>like</button></div>
+            </li>
+             `)
+            }
+            else return(`
+        <li>
+            <div>
+                <div></div>
+                <img src="${el.album.images[0].url}" alt="">
+                <div>
+                    <h3>${el.name}</h3>
+                    <h4>${el.type}</h4>
+                </div>
+            </div>
+            <div><button>play</button><button>like</button></div>
+        </li>
+        ` )
+
+    }).splice(0,5).join("");
+    }
+});
+
+homeKnop.addEventListener("click",()=>{
+    zoekenKnop.classList.remove("aanwezig");
+    homeKnop.classList.add("aanwezig");
+
+    home.style.display = "block";
+    zoekPagina.style.display = "none";
+});
+
+zoekenKnop.addEventListener("click",()=>{
+    zoekenKnop.classList.add("aanwezig");
+    homeKnop.classList.remove("aanwezig");
+
+    home.style.display = "none";
+    zoekPagina.style.display = "block";
+});
