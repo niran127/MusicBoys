@@ -15,6 +15,7 @@ const homeKnop = document.getElementById("homeKnop");
 const zoekenKnop = document.getElementById("zoekenKnop");
 const home = document.getElementById("home");
 const zoekPagina = document.getElementById("zoekPagina");
+const collectiePagina = document.getElementById("collectiePagina");
 
 const resultaten = document.getElementById("resultaten");
 let data;
@@ -232,7 +233,9 @@ zoekKnop.addEventListener('click',async()=>{
 homeKnop.addEventListener("click",()=>{
     zoekenKnop.classList.remove("aanwezig");
     homeKnop.classList.add("aanwezig");
+    collectieKnop.remove("aanwezig");
 
+    collectiePagina.style.display = "none";
     home.style.display = "block";
     zoekPagina.style.display = "none";
 });
@@ -240,7 +243,19 @@ homeKnop.addEventListener("click",()=>{
 zoekenKnop.addEventListener("click",()=>{
     zoekenKnop.classList.add("aanwezig");
     homeKnop.classList.remove("aanwezig");
+    collectieKnop.classList.remove("aanwezig");
 
+    collectiePagina.style.display = "none"
     home.style.display = "none";
     zoekPagina.style.display = "block";
+});
+
+collectieKnop.addEventListener("click",()=>{
+    zoekenKnop.classList.remove("aanwezig");
+    homeKnop.classList.remove("aanwezig");
+    collectieKnop.classList.add("aanwezig");
+
+    collectiePagina.style.display = "block"
+    home.style.display = "none";
+    zoekPagina.style.display = "none";
 });

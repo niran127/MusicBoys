@@ -237,3 +237,39 @@ footer ul li {
 .aanwezig{
     background-color: rgb(118, 91, 205);
 }
+
+.dropbtn{
+    background-color: rgb(118, 91, 205);
+    color: black;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+}
+
+.dropdown{
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content{
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0px 8px 0px rgba(0,0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown-content a{
+    color: rgb(216, 188, 234);
+    padding: 12px,16px;
+    text-decoration: none;
+    display: block;
+    background-color: gray;
+}
+
+.dropdown-content a:hover {background-color: rgb(118, 91, 205);}
+.dropdown:hover .dropdown-content{display: block;}
+.dropdown:hover .dropbtn{background-color: rgb(118, 91, 205);}
+
+#collectiePagina, #collectiePagina div{margin: 0px;}
