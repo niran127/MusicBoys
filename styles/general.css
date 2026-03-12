@@ -331,7 +331,7 @@ main {
   display: flex;
   gap: 10px;
   margin-bottom: 14px;
-  background-color: var(--card);
+  border-radius: var(--radius);
 }
 
 .search-input-wrap {
@@ -752,7 +752,7 @@ footer {
 
 .vol-fill {
   height: 100%;
-  width: 38%;
+  width: 50%;
   background: var(--text-dim);
   border-radius: 2px;
 }

@@ -121,7 +121,7 @@ window._initSpotifyPlayer = async () => {
   spPlayer = new Spotify.Player({
     name: "MusicMatch",
     getOAuthToken: async cb => cb(await getSpToken()),
-    volume: 0.3 * VOLUME_LIMIT,    // standaard volume wanneer je app laadt. 0.3 = 30%
+    volume: 0.5 * VOLUME_LIMIT,    // standaard volume wanneer je app laadt. 0.5 = 50%
   });
 
   spPlayer.addListener("ready", ({ device_id }) => {
