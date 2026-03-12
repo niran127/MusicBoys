@@ -1,0 +1,6 @@
+{
+  "name": "musicboys",
+  "scripts": {
+    "start": "npx serve . -l 3050"
+  }
+}

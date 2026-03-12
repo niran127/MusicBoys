@@ -5,7 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./styles/reset.css" />
     <link rel="stylesheet" href="./styles/general.css" />
+    <!-- laadt de sdk voordat de home.js file wordt geladen, anders BIG BUGS -->
+    <script>
+      window._spSDKFired = false;
+      window.onSpotifyWebPlaybackSDKReady = function () {
+        window._spSDKFired = true;
+        if (window._initSpotifyPlayer) window._initSpotifyPlayer();
+      };
+    </script>
     <script src="./scripts/home.js" defer></script>
+    <script src="./scripts/spotify.js" defer></script>
+    <script src="https://sdk.scdn.co/spotify-player.js" async></script>
     <title>MusicMatch</title>
   </head>
   <body>
@@ -354,6 +364,7 @@
                 id="zoekVeld"
                 type="text"
                 placeholder="Zoek naar artiesten of nummers ..."
+                style="background-color: var(--card)"
               />
             </div>
             <button id="zoekKnop" class="search-btn">Zoeken</button>
@@ -500,8 +511,9 @@
           </svg>
         </button>
         <div class="vol-row">
-          <div class="vol-bar"><div class="vol-fill"></div></div>
+          <div class="vol-bar"><div class="vol-fill" style="width:70%"></div></div>
         </div>
+        <button id="spotify-login-btn" class="spotify-login-btn">Login Spotify</button>
       </div>
     </footer>
   </body>

@@ -53,32 +53,7 @@ document
   .getElementById("action-zoek")
   .addEventListener("click", () => showPage("zoeken"));
 
-// spotify api
-const clientId = "7c5773b9dcc149b38a50f1d7d83c34a7";
-const clientSecret = "f9a584351aac45889f29e806274d73c4";
-
-async function getAccessToken() {
-  const credentials = btoa(clientId + ":" + clientSecret);
-  const response = await fetch("https://accounts.spotify.com/api/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: "Basic " + credentials,
-    },
-    body: "grant_type=client_credentials",
-  });
-  const data = await response.json();
-  return data.access_token;
-}
-
-async function spotifySearch(query, type) {
-  const token = await getAccessToken();
-  const response = await fetch(
-    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=${type}&limit=5`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  return response.json();
-}
+// De Spotify API functies (search & playback) staan nu in spotify.js om dubbele code te voorkomen
 
 function getSimilarityScore(text, search) {
   if (text === search) return 100; // Exacte match (hoogste prio)
@@ -115,14 +90,31 @@ function setFilter(btn) {
   btn.classList.add("selected");
 }
 
-function renderTrackRow(imageUrl, name, subtitle, type) {
+function renderTrackRow(imageUrl, name, subtitle, type, trackUri = null) {
+  const eName = name.replace(/"/g, '&quot;');
+  const eSub  = subtitle.replace(/"/g, '&quot;');
+  const data  = trackUri
+    ? `data-uri="${trackUri}" data-name="${eName}" data-artist="${eSub}" data-image="${imageUrl || ''}"`
+    : '';
+  
+  const playIcon = `
+    <div class="play-overlay">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+      </svg>
+    </div>
+  `;
+
   return `
-    <div class="track-row">
-      ${
-        imageUrl
-          ? `<img class="track-art" src="${imageUrl}" alt="${name}" onerror="this.parentElement.querySelector('.track-art-placeholder') && (this.style.display='none')">`
-          : `<div class="track-art-placeholder">🎵</div>`
-      }
+    <div class="track-row${trackUri ? ' playable' : ''}" ${data}>
+      <div class="track-art-container">
+        ${
+          imageUrl
+            ? `<img class="track-art" src="${imageUrl}" alt="${name}" onerror="this.style.display='none'">`
+            : `<div class="track-art-placeholder">:(</div>`
+        }
+        ${trackUri ? playIcon : ''}
+      </div>
       <div class="track-info">
         <div class="track-name">${name}</div>
         <div class="track-artist">${subtitle}</div>
@@ -175,7 +167,7 @@ zoekKnop.addEventListener("click", async () => {
           .map((el) => {
             const img = el.album?.images?.[0]?.url || null;
             const artists = el.artists.map((a) => a.name).join(", ");
-            return renderTrackRow(img, el.name, artists, "Nummer");
+            return renderTrackRow(img, el.name, artists, "Nummer", el.uri);
           })
           .join("") ||
         `<div class="empty-state">Geen resultaten gevonden</div>`;
@@ -205,7 +197,7 @@ zoekKnop.addEventListener("click", async () => {
             } else {
               const img = el.album?.images?.[0]?.url || null;
               const artists = el.artists.map((a) => a.name).join(", ");
-              return renderTrackRow(img, el.name, artists, "Nummer");
+              return renderTrackRow(img, el.name, artists, "Nummer", el.uri);
             }
           })
           .join("") ||
@@ -217,6 +209,18 @@ zoekKnop.addEventListener("click", async () => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
         btn.classList.toggle("liked");
+      });
+    });
+
+    // klik om af te spelen
+    resultaten.querySelectorAll(".track-row.playable").forEach((row) => {
+      row.addEventListener("click", (e) => {
+        if (e.target.closest(".track-like-btn")) return;
+        playSong(row.dataset.uri, {
+          name:   row.dataset.name,
+          artist: row.dataset.artist,
+          image:  row.dataset.image,
+        });
       });
     });
   } catch (err) {

@@ -24,7 +24,6 @@ body {
   overflow: hidden;
 }
 
-/* ── SIDEBAR ── */
 aside {
   grid-row: 1 / 2;
   background: var(--surface);
@@ -127,7 +126,6 @@ nav {
   color: var(--accent2);
 }
 
-/* ── MAIN ── */
 main {
   grid-column: 2;
   grid-row: 1;
@@ -201,7 +199,7 @@ main {
   font-weight: 500;
 }
 
-/* ── SECTIONS ── */
+
 .section-title {
   font-size: 0.72rem;
   font-weight: 600;
@@ -211,7 +209,6 @@ main {
   margin-bottom: 14px;
 }
 
-/* ── MOODS ── */
 .moods {
   display: flex;
   gap: 10px;
@@ -251,7 +248,6 @@ main {
   transform: translateY(-2px);
 }
 
-/* ── ACTION CARDS ── */
 .actions-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -331,7 +327,6 @@ main {
   color: var(--accent);
 }
 
-/* zoek pagina*/
 .search-bar {
   display: flex;
   gap: 10px;
@@ -428,7 +423,6 @@ main {
   color: var(--accent);
 }
 
-/* ── TRACK ROWS (search results) ── */
 .tracks {
   display: flex;
   flex-direction: column;
@@ -450,18 +444,51 @@ main {
   background: var(--card);
 }
 
-.track-art {
+.track-art-container {
+  position: relative;
   width: 44px;
   height: 44px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.track-art {
+  width: 100%;
+  height: 100%;
   border-radius: 8px;
   background: var(--border);
   object-fit: cover;
+  transition: transform 0.2s, filter 0.2s;
+}
+
+.track-art-container:hover .track-art {
+  transform: scale(1.05);
+}
+
+.playable:hover .track-art {
+  filter: brightness(0.6);
+}
+
+.play-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.track-row.playable:hover .play-overlay {
+  opacity: 1;
 }
 
 .track-art-placeholder {
-  width: 44px;
-  height: 44px;
-  border-radius: 8px;
+  width: 100%;
+  height: 100%;
   background: linear-gradient(135deg, var(--border), var(--card));
   display: flex;
   align-items: center;
@@ -525,7 +552,7 @@ main {
   font-size: 0.88rem;
 }
 
-/* ── FOOTER PLAYER ── */
+/* player bar */
 footer {
   grid-column: 1 / -1;
   grid-row: 2;
@@ -730,7 +757,31 @@ footer {
   border-radius: 2px;
 }
 
-/* ── SCROLLBAR ── */
+.spotify-login-btn {
+  background: #1db954;
+  color: #000;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s, transform 0.1s;
+  flex-shrink: 0;
+}
+
+.spotify-login-btn:hover {
+  opacity: 0.85;
+  transform: scale(1.03);
+}
+
+.spotify-login-btn.connected {
+  background: #1db954;
+  opacity: 0.6;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }
