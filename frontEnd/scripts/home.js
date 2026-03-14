@@ -18,7 +18,20 @@ const zoekPagina = document.getElementById("zoekPagina");
 const collectiePagina = document.getElementById("collectiePagina");
 
 const resultaten = document.getElementById("resultaten");
+
+const populariteitSort = document.getElementById("populariteitSort");
+const alphabetischSort = document.getElementById("alphabetischSort");
+const duurtijdsort = document.getElementById("duurtijdsort");
+const dropbtn = document.getElementById("dropbtn");
+
+const likeNummers = document.getElementById("likeNummers");
+const gegNummers = document.getElementById("gegNummers");
+
+const lijst = document.getElementById("lijst");
+
+
 let data;
+const likedSongs = [];
 
 let zoekInstelling = "artist,track";
 
@@ -176,9 +189,10 @@ zoekKnop.addEventListener('click',async()=>{
                     <h4>${el.type}</h4>
                 </div>
             </div>
-            <div><button>play</button><button>like</button></div>
+            <div><button>play</button><button class="likeButton ${likedSongs.indexOf(el.id) === -1? '':'geliked'}" id="${el.id}">like</button></div>
         </li>
         `).join("");
+        actieveerKnoppen()
     }
     else if(zoekInstelling === "artist,track"){
         const allItems = [...data.artists.items,...data.tracks.items];
@@ -222,12 +236,13 @@ zoekKnop.addEventListener('click',async()=>{
                     <h4>${el.type}</h4>
                 </div>
             </div>
-            <div><button>play</button><button>like</button></div>
+            <div><button>play</button><button class="likeButton ${likedSongs.indexOf(el.id) === -1? '':'geliked'}" id="${el.id}" >like</button></div>
         </li>
         ` )
 
     }).splice(0,5).join("");
     }
+    actieveerKnoppen()
 });
 
 homeKnop.addEventListener("click",()=>{
@@ -258,4 +273,109 @@ collectieKnop.addEventListener("click",()=>{
     collectiePagina.style.display = "block"
     home.style.display = "none";
     zoekPagina.style.display = "none";
+});
+
+populariteitSort.addEventListener("click",()=>{
+    dropbtn.innerHTML = "sorteer op: populariteit";
+})
+
+alphabetischSort.addEventListener("click",()=>{
+    dropbtn.innerHTML = "sorteer op: alphabetisch";
+})
+
+duurtijdsort.addEventListener("click",()=>{
+    dropbtn.innerHTML = "sorteer op: duurtijd"
+})
+
+likeNummers.addEventListener("click",()=>{
+    likeNummers.classList.add("colSel");
+    gegNummers.classList.remove("colSel");
+})
+
+gegNummers.addEventListener("click",()=>{
+    gegNummers.classList.add("colSel");
+    likeNummers.classList.remove("colSel");
+})
+
+
+
+
+function actieveerKnoppen() {
+    const likeButtons = document.querySelectorAll('.likeButton');
+    console.log("Aantal knoppen gevonden:", likeButtons.length); // Check je console!
+
+    likeButtons.forEach(button => {
+        // Verwijder eventuele oude listeners om dubbele kliks te voorkomen
+        button.replaceWith(button.cloneNode(true));
+    });
+
+    // Selecteer ze opnieuw na het clonen
+    const freshButtons = document.querySelectorAll('.likeButton');
+
+    freshButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault(); // Voorkom dat de pagina herlaadt
+            
+            const knopId = this.id; 
+            const index = likedSongs.indexOf(knopId);
+
+            console.log("Geklikt op ID:", knopId);
+
+            if (index === -1) {
+                likedSongs.push(knopId);
+                this.classList.add("geliked");
+                console.log("Status: Toegevoegd");
+            } else {
+                likedSongs.splice(index, 1);
+                this.classList.remove("geliked");
+                console.log("Status: Verwijderd");
+            }
+            
+            console.log("Huidige lijst:", likedSongs);
+        });
+    });
+}
+
+likeNummers.addEventListener("click", async () => {
+    // 1. Toon een lader of maak de lijst leeg
+
+    try {
+        const token = await getAccessToken();
+
+        // 2. Haal voor elk ID in likedSongs de data op
+        // We gebruiken Promise.all om te wachten tot ze ALLEMAAL klaar zijn
+        const songPromises = likedSongs.map(async (id) => {
+            const response = await fetch(`https://api.spotify.com/v1/search?q=${id}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            return await response.json();
+        });
+
+        const volledigeNummers = await Promise.all(songPromises);
+
+        // 3. Nu hebben we 'volledigeNummers', een lijst met JSON objecten.
+        // Die gaan we afprinten in de HTML.
+        const html = volledigeNummers.map((el) => {
+            return `
+                <li>
+                    <img src="${el.album.images[0].url}" alt="">
+                    <div>
+                        <h4>${el.name}</h4>
+                        <p>${el.artists[0].name} ° ${el.album.name}</p>
+                    </div>
+                    <button class="likeButton geliked" id="${el.id}">Like</button>
+                </li>
+            `;
+        }).join("");
+
+        // 4. Zet de HTML daadwerkelijk in je pagina
+        lijst.innerHTML = html;
+        
+        // Vergeet niet de knoppen weer klikbaar te maken als je ze ook hier wilt kunnen unliken!
+        actieveerKnoppen();
+
+    } catch (error) {
+        console.error("Technische fout in collectie:", error);
+        lijst.innerHTML = "Er ging iets mis.";
+    }
 });

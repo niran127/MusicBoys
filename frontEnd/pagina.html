@@ -80,19 +80,24 @@
                 </ul>
             </li>
             <li id="collectiePagina" style="display: none;">
-                <div>
+                <div id="colHeader">
                     <h1>Mijn collectie</h1>
-                    <button>nummers</button><button>Genereer</button>
+                    <button>nummers geklikete</button><button>Genereer</button>
                 </div>
-                <div>
-                    <div class="dropdown">
-                        <button class="dropbtn">Sorteer op: Popularity</button>
-                        <div class="dropdown-content">
-                            <a id="popularity-sel" href="#">Popularity</a><a id="alfabetisch-sel" href="#">Alfabetisch</a><a id="duration-sel" href="#">Duration</a>
-                        </div>
-                    </div>
+                <div class="dropdown">
+                <button id="dropbtn" class="dropbtn">sorteer op: populariteit</button>
+                <div class="dropdown-content">
+                    <a id="populariteitSort" href="#">populariteit</a>
+                    <a id="alphabetischSort" href="#">alphabetisch</a>
+                    <a id="duurtijdsort" href="#">duurtijd</a>
                 </div>
-            </li>
+                </div>
+                <div id="lijstenSelecteren">
+                    <p id="likeNummers">Gelikete nummers</p>
+                    <p id="gegNummers">gegenereerde playlisten</p>
+                </div>
+                <ul id="lijst">
+                    
         </ul>
     </main>
     <footer>
