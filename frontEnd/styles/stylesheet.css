@@ -286,7 +286,7 @@ footer ul li {
 
 #collectiePagina div:first-child {
     display: grid;
-    grid-template-columns: 6fr 1fr 1fr;
+    grid-template-columns: 6fr 3fr 1fr;
     gap: 1rem;
     padding-bottom: 2rem;
 }
@@ -340,8 +340,8 @@ footer ul li {
 }
 
 #lijst li button{
-    background-color: rgb(118, 91, 205);
-    color: white;
+    
+    border: 1px black solid;
 }
 
 #lijst li button:hover{
@@ -357,6 +357,7 @@ footer ul li {
     opacity: 0.5;
     cursor: pointer;
 }
+
 
 .geliked{
     background-color: rgb(118, 91, 205);

@@ -29,9 +29,12 @@ const gegNummers = document.getElementById("gegNummers");
 
 const lijst = document.getElementById("lijst");
 
+const countLike = document.getElementById("countLike");
+
 
 let data;
 const likedSongs = [];
+let songs = [];
 
 let zoekInstelling = "artist,track";
 
@@ -324,40 +327,27 @@ function actieveerKnoppen() {
             if (index === -1) {
                 likedSongs.push(knopId);
                 this.classList.add("geliked");
-                console.log("Status: Toegevoegd");
+                console.log("Status: Toegevoegd"+this.classList);
             } else {
                 likedSongs.splice(index, 1);
                 this.classList.remove("geliked");
-                console.log("Status: Verwijderd");
+                console.log("Status: Verwijderd" + this.classList);
+                
             }
-            
+            countLike.innerHTML = `nummers gelikete: ${likedSongs.length}`
             console.log("Huidige lijst:", likedSongs);
         });
     });
 }
 
 likeNummers.addEventListener("click", async () => {
-    // 1. Toon een lader of maak de lijst leeg
-
-    try {
-        const token = await getAccessToken();
-
-        // 2. Haal voor elk ID in likedSongs de data op
-        // We gebruiken Promise.all om te wachten tot ze ALLEMAAL klaar zijn
-        const songPromises = likedSongs.map(async (id) => {
-            const response = await fetch(`https://api.spotify.com/v1/search?q=${id}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            return await response.json();
-        });
-
-        const volledigeNummers = await Promise.all(songPromises);
-
-        // 3. Nu hebben we 'volledigeNummers', een lijst met JSON objecten.
-        // Die gaan we afprinten in de HTML.
-        const html = volledigeNummers.map((el) => {
-            return `
-                <li>
+    for(id of likedSongs){
+        const song = await getSongById(id);
+        songs.push(song);
+    }
+    lijst.innerHTML = songs.map((el)=>{
+        return `
+            <li>
                     <img src="${el.album.images[0].url}" alt="">
                     <div>
                         <h4>${el.name}</h4>
@@ -365,17 +355,29 @@ likeNummers.addEventListener("click", async () => {
                     </div>
                     <button class="likeButton geliked" id="${el.id}">Like</button>
                 </li>
-            `;
-        }).join("");
+        `
+    })
+     songs = [];
+    console.log(songs);
+    actieveerKnoppen()
+   });
 
-        // 4. Zet de HTML daadwerkelijk in je pagina
-        lijst.innerHTML = html;
+async function getSongById(id) {
+    try {
+        const token = await getAccessToken();
+
+        const response = await fetch("https://api.spotify.com/v1/tracks/"+id, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+        console.log(data)
+        return data;
         
-        // Vergeet niet de knoppen weer klikbaar te maken als je ze ook hier wilt kunnen unliken!
-        actieveerKnoppen();
-
     } catch (error) {
-        console.error("Technische fout in collectie:", error);
-        lijst.innerHTML = "Er ging iets mis.";
+        console.error("Technische fout:", error);
     }
-});
+}
+
