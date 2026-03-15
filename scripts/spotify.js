@@ -4,10 +4,10 @@ const SP_REDIRECT_URI  = "http://127.0.0.1:3050";
 const SP_SCOPES        = "streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state";
 
 // max volume regelaar, 1 is max, 0.5 is 50%
-const VOLUME_LIMIT = 0.5; 
+const VOLUME_LIMIT = 0.5;
 
 
-// PKCE helpers
+// pkce helpers
 function genVerifier(len = 128) {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
   const vals  = crypto.getRandomValues(new Uint8Array(len));
@@ -81,7 +81,7 @@ function spIsLoggedIn() {
   return !!(localStorage.getItem("sp_at") && localStorage.getItem("sp_rt"));
 }
 
-// voor guests
+// voor guests (zonder login)
 async function getClientToken() {
   const credentials = btoa(SP_CLIENT_ID + ":" + SP_CLIENT_SECRET);
   const response = await fetch("https://accounts.spotify.com/api/token", {
@@ -96,10 +96,29 @@ async function getClientToken() {
   return data.access_token;
 }
 
-// search functie: gebruikt user token als je ingelogd bent, anders client token
-async function spotifySearch(query, type) {
+async function getAuthToken() {
   let token = await getSpToken();
   if (!token) token = await getClientToken();
+  return token;
+}
+
+// opslag hulpjes
+function getLikes() {
+  return JSON.parse(localStorage.getItem("spotify_liked_tracks") || "[]");
+}
+function setLikes(likes) {
+  localStorage.setItem("spotify_liked_tracks", JSON.stringify(likes));
+}
+function getStoredCurrentTrack() {
+  return JSON.parse(localStorage.getItem("spotify_current_track") || "{}");
+}
+function setStoredCurrentTrack(data) {
+  localStorage.setItem("spotify_current_track", JSON.stringify(data));
+}
+
+// zoeken: gebruikt user token als je ingelogd bent, anders client token
+async function spotifySearch(query, type) {
+  const token = await getAuthToken();
 
   const response = await fetch(
     `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=${type}&limit=5`,
@@ -108,7 +127,41 @@ async function spotifySearch(query, type) {
   return response.json();
 }
 
-// player
+async function spotifyGetArtist(artistId) {
+  const token = await getAuthToken();
+  const res = await fetch(`https://api.spotify.com/v1/artists/${artistId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.json();
+}
+
+async function spotifyGetArtistTopTracks(artistId) {
+  const token = await getAuthToken();
+  const res = await fetch(`https://api.spotify.com/v1/artists/${artistId}/top-tracks?market=BE`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.json();
+}
+
+async function spotifyGetArtistAlbums(artistId) {
+  const token = await getAuthToken();
+  const res = await fetch(`https://api.spotify.com/v1/artists/${artistId}/albums?include_groups=album,single&limit=10&market=BE`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.json();
+}
+
+async function spotifyGetTrack(trackId) {
+  const token = await getAuthToken();
+  const res = await fetch(`https://api.spotify.com/v1/tracks/${trackId}`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  return res.json();
+}
+
+
+
+// player settings
 let spPlayer   = null;
 let spDeviceId = null;
 let spInterval = null;
@@ -138,52 +191,121 @@ window._initSpotifyPlayer = async () => {
   spPlayer.connect();
 };
 
-function wirePlayerControls() {
-  document.getElementById("play-btn")
-    ?.addEventListener("click", () => spPlayer?.togglePlay());
-  document.querySelector('.ctrl-btn[title="Volgende"]')
-    ?.addEventListener("click", () => spPlayer?.nextTrack());
-  document.querySelector('.ctrl-btn[title="Vorige"]')
-    ?.addEventListener("click", () => spPlayer?.previousTrack());
-
-  document.querySelector(".progress-bar")
-    ?.addEventListener("click", async e => {
-      const state = await spPlayer?.getCurrentState();
-      if (!state) return;
-      const r = e.currentTarget.getBoundingClientRect();
-      spPlayer?.seek(Math.round(((e.clientX - r.left) / r.width) * state.duration));
-    });
-
-  document.querySelector(".vol-bar")
-    ?.addEventListener("click", e => {
-      const r   = e.currentTarget.getBoundingClientRect();
-      const pct = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
-      spPlayer?.setVolume(pct * VOLUME_LIMIT);
-      document.querySelector(".vol-fill").style.width = `${pct * 100}%`;
-    });
+// checked id duplicate
+if (typeof window.getTrackId !== 'function') {
+  window.getTrackId = function(uri) {
+    if (typeof uri !== 'string') return uri;
+    return uri.split(':').pop();
+  };
 }
 
-async function playSong(trackUri, meta) {
-  const token = await getSpToken();
-  if (!token)     { alert("Log in met Spotify om nummers af te spelen."); spotifyLogin(); return; }
-  if (!spDeviceId){ alert("Spotify speler is nog niet klaar. Wacht even."); return; }
-
-  await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${spDeviceId}`, {
-    method: "PUT",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ uris: [trackUri] }),
+function wirePlayerControls() {
+  document.getElementById("play-btn")?.addEventListener("click", async () => {
+    const state = await spPlayer?.getCurrentState();
+    if (!state || !state.track_window?.current_track) {
+      const current = getStoredCurrentTrack();
+      if (current.uri && current.meta) {
+        playSong(current.uri, current.meta);
+        return;
+      }
+    }
+    spPlayer?.togglePlay();
   });
 
-  // playerbalk updaten
-  if (meta) {
-    document.getElementById("now-name").textContent   = meta.name;
-    document.getElementById("now-artist").textContent = meta.artist;
-    if (meta.image) {
-      document.getElementById("now-art").innerHTML =
-        `<img src="${meta.image}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">`;
+  document.querySelector('.ctrl-btn[title="Volgende"]')?.addEventListener("click", () => spPlayer?.nextTrack());
+  document.querySelector('.ctrl-btn[title="Vorige"]')?.addEventListener("click", () => spPlayer?.previousTrack());
+
+  document.getElementById("like-btn")?.addEventListener("click", () => {
+    const current = getStoredCurrentTrack();
+    if (!current.uri) return;
+
+    if (typeof toggleGlobalLike === "function") {
+      toggleGlobalLike(current.uri, current.meta);
     }
+  });
+
+  document.querySelector(".vol-bar")?.addEventListener("click", e => {
+    const r   = e.currentTarget.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    spPlayer?.setVolume(pct * VOLUME_LIMIT);
+    document.querySelector(".vol-fill").style.width = `${pct * 100}%`;
+  });
+}
+
+// player bar bijwerken met metadata
+function updateUIPlayer(meta) {
+  if (!meta) return;
+  const nameEl = document.getElementById("now-name");
+  const artistEl = document.getElementById("now-artist");
+  
+  if (nameEl) nameEl.textContent = meta.name || "";
+  if (artistEl) {
+    artistEl.textContent = meta.artist || "";
+    if (meta.artistUri) {
+      artistEl.dataset.uri = meta.artistUri;
+      artistEl.style.cursor = "pointer";
+    } else {
+      delete artistEl.dataset.uri;
+      artistEl.style.cursor = "default";
+    }
+  }
+
+  if (meta.image) {
+    document.getElementById("now-art").innerHTML =
+      `<img src="${meta.image}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">`;
+  } else {
+    document.getElementById("now-art").innerHTML = "";
+  }
+}
+
+async function playSong(trackUri, meta, isNavAction = false) {
+  const token = await getAuthToken();
+  if (!token) {
+    spotifyLogin();
+    return;
+  }
+  if (!spDeviceId) return;
+
+  const body = Array.isArray(trackUri) ? { uris: trackUri } : { uris: [trackUri] };
+
+  try {
+    const response = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${spDeviceId}`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      console.error("[MusicBoys] Playback error:", await response.json());
+    }
+  } catch (err) {
+    console.error("[MusicBoys] Playback fetch error:", err);
+  }
+
+  // player bar updaten
+  if (meta) {
+    updateUIPlayer(meta);
     document.getElementById("play-btn").innerHTML =
       `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+
+    const singleUri = Array.isArray(trackUri) ? trackUri[0] : trackUri;
+    
+    // update like status in player bar (is nu gecentraliseerd in home.js maar we doen het hier ook voor snelheid)
+    const isLiked = getLikes().some(l => getTrackId(l.uri) === getTrackId(singleUri));
+    const btn = document.getElementById("like-btn");
+    if (btn) btn.classList.toggle("liked", isLiked);
+
+    setStoredCurrentTrack({ uri: singleUri, meta });
+    
+    if (!isNavAction) {
+      // history bijwerken
+      let hist = JSON.parse(localStorage.getItem("spotify_history") || "[]");
+      const checkUri = Array.isArray(trackUri) ? trackUri[0] : trackUri;
+      if (hist.length === 0 || hist[hist.length - 1].uri !== checkUri) {
+        hist.push({ uri: checkUri, meta });
+        if (hist.length > 50) hist.shift();
+        localStorage.setItem("spotify_history", JSON.stringify(hist));
+      }
+    }
   }
 
   clearInterval(spInterval);
@@ -197,14 +319,23 @@ function updatePlayerBar(state) {
   const track = state.track_window?.current_track;
   if (!track) return;
 
-  document.getElementById("now-name").textContent   = track.name;
-  document.getElementById("now-artist").textContent = track.artists.map(a => a.name).join(", ");
-
-  const imgUrl = track.album?.images?.[0]?.url;
-  if (imgUrl) {
-    const art = document.getElementById("now-art");
-    if (art.querySelector("img")?.src !== imgUrl) {
-      art.innerHTML = `<img src="${imgUrl}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:6px;">`;
+  const currentName = document.getElementById("now-name").textContent;
+  if (currentName !== track.name) {
+    const meta = {
+      name: track.name,
+      artist: track.artists.map(a => a.name).join(", "),
+      artistUri: track.artists[0]?.uri || null,
+      image: track.album?.images?.[0]?.url
+    };
+    
+    updateUIPlayer(meta);
+    setStoredCurrentTrack({ uri: track.uri, meta });
+    
+    const isLiked = getLikes().some(l => getTrackId(l.uri) === getTrackId(track.uri));
+    const likeBtn = document.getElementById("like-btn");
+    if (likeBtn) {
+      if (isLiked) likeBtn.classList.add("liked");
+      else likeBtn.classList.remove("liked");
     }
   }
 
@@ -247,7 +378,18 @@ function setLoginBtn(state) {
   }
 }
 
-// Init: verwerk OAuth callback en zet knop
+// sessie herstellen
+function loadPlayerFromStorage() {
+  const current = getStoredCurrentTrack();
+  if (current.uri && current.meta) {
+    updateUIPlayer(current.meta);
+    const isLiked = getLikes().some(l => getTrackId(l.uri) === getTrackId(current.uri));
+    const btn = document.getElementById("like-btn");
+    if (btn) btn.classList.toggle("liked", isLiked);
+  }
+}
+
+// opstarten: oAuth callback en login check
 (async () => {
   const code = new URLSearchParams(window.location.search).get("code");
   if (code) await exchangeCode(code);
@@ -256,4 +398,6 @@ function setLoginBtn(state) {
   if (window._spSDKFired && spIsLoggedIn()) {
     window._initSpotifyPlayer();
   }
+
+  loadPlayerFromStorage();
 })();
