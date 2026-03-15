@@ -119,7 +119,7 @@ window._initSpotifyPlayer = async () => {
   if (!token) return;
 
   spPlayer = new Spotify.Player({
-    name: "MusicMatch",
+    name: "MusicBoys",
     getOAuthToken: async cb => cb(await getSpToken()),
     volume: 0.5 * VOLUME_LIMIT,    // standaard volume wanneer je app laadt. 0.5 = 50%
   });
@@ -128,7 +128,7 @@ window._initSpotifyPlayer = async () => {
     spDeviceId = device_id;
     setLoginBtn("connected");
     wirePlayerControls();
-    console.log("[MusicMatch] Spotify klaar ✓");
+    console.log("[MusicBoys] Spotify klaar");
   });
   spPlayer.addListener("not_ready",            ()    => { spDeviceId = null; });
   spPlayer.addListener("player_state_changed", state => { if (state) updatePlayerBar(state); });
