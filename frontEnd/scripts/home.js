@@ -345,7 +345,17 @@ likeNummers.addEventListener("click", async () => {
         const song = await getSongById(id);
         songs.push(song);
     }
-    lijst.innerHTML = songs.map((el)=>{
+    lijst.innerHTML = songs.sort((a,b)=>{
+        if(dropbtn.innerHTML === "sorteer op: alphabetisch"){
+            return a.name.localeCompare(b.name)
+        }
+        else if(dropbtn.innerHTML === "sorteer op: populariteit"){
+            return b.popularity - a.popularity
+        }
+        else{
+            return b.duration_ms - a.duration_ms
+        }
+    }).map((el)=>{
         return `
             <li>
                     <img src="${el.album.images[0].url}" alt="">
@@ -356,7 +366,7 @@ likeNummers.addEventListener("click", async () => {
                     <button class="likeButton geliked" id="${el.id}">Like</button>
                 </li>
         `
-    })
+    }).join("");
      songs = [];
     console.log(songs);
     actieveerKnoppen()
