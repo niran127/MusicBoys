@@ -159,6 +159,16 @@ async function spotifyGetTrack(trackId) {
   return res.json();
 }
 
+async function spotifyGetMe() {
+  const token = await getAuthToken();
+  if (!token) return null;
+  const res = await fetch(`https://api.spotify.com/v1/me`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
 
 
 // player settings

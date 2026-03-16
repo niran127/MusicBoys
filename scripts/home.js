@@ -8,9 +8,28 @@ function setGreeting(name = "gebruiker") {
   else if (hour < 18) greeting = "Goedemiddag";
   else greeting = "Goedenavond";
   greetingEl.innerHTML = `${greeting}, <span>${name}</span>`;
+
+  // naam veranderd in userpill
+  const userNameEl = document.getElementById("user-name");
+  if (userNameEl && name !== "gebruiker") {
+    userNameEl.textContent = name;
+  }
 }
 
-setGreeting();
+(async function initGreeting() {
+  if (typeof spIsLoggedIn === "function" && spIsLoggedIn()) {
+    try {
+      const me = await spotifyGetMe();
+      if (me && me.display_name) {
+        setGreeting(me.display_name);
+        return;
+      }
+    } catch (err) {
+      console.error("Fout bij ophalen gebruikersnaam:", err);
+    }
+  }
+  setGreeting();
+})();
 
 // Mood selector
 const moods = document.querySelectorAll(".mood-chip");
@@ -197,7 +216,7 @@ function renderTrackRow(imageUrl, name, subtitle, type, trackUri = null, isLiked
   const data  = trackUri && isTrack
     ? `data-uri="${trackUri}" data-name="${eName}" data-artist="${eArtistMeta}" data-image="${imageUrl || ''}" data-type="${type}" ${artistUri ? `data-artist-uri="${artistUri}"` : ''}`
     : `data-type="${type}" ${artistUri ? `data-artist-uri="${artistUri}"` : ''}`;
-  
+
   const playIcon = isTrack && trackUri ? `
     <div class="play-overlay">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
