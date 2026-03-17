@@ -1,0 +1,14 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap");
+
+:root {
+  --bg: #0a0a0f;
+  --surface: #111118;
+  --card: #18181f;
+  --border: #252530;
+  --accent: #7c5cfc;
+  --accent2: #c86dd7;
+  --muted: #6b6b7b;
+  --text: #e8e8f0;
+  --text-dim: #9494a8;
+  --radius: 14px;
+}

@@ -1,0 +1,221 @@
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.now-art {
+  width: 56px;
+  height: 56px;
+  background: var(--card);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.now-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.now-name {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.now-name:hover {
+  text-decoration: underline;
+}
+
+.now-artist {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.now-artist:hover {
+  text-decoration: underline;
+  color: #fff;
+}
+
+.like-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  margin-left: 8px;
+  transition: color 0.15s;
+}
+
+.like-btn:hover {
+  color: var(--accent2);
+}
+.like-btn.liked {
+  color: var(--accent2);
+}
+.like-btn.liked svg {
+  fill: var(--accent2);
+}
+
+.player-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ctrl-btns {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ctrl-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, transform 0.1s;
+  border-radius: 50%;
+}
+
+.ctrl-btn:active {
+  transform: scale(0.9);
+}
+
+.play-btn {
+  width: 38px;
+  height: 38px;
+  background: var(--text);
+  border-radius: 50%;
+  color: var(--bg);
+  transition: transform 0.1s, background 0.15s;
+}
+
+.play-btn:hover {
+  background: #fff;
+  transform: scale(1.06);
+}
+
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.progress-time {
+  font-size: 0.7rem;
+  color: var(--muted);
+  min-width: 32px;
+  text-align: center;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 2px;
+  position: relative;
+  transition: width 1s linear;
+}
+
+.progress-fill::after {
+  content: "";
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.progress-bar:hover .progress-fill::after {
+  opacity: 1;
+}
+
+.player-extra {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.vol-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.vol-bar {
+  width: 80px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+}
+
+.vol-fill {
+  height: 100%;
+  width: 50%;
+  background: var(--text-dim);
+  border-radius: 2px;
+}
+
+.spotify-login-btn {
+  background: #1db954;
+  color: #000;
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.2s, transform 0.1s;
+  flex-shrink: 0;
+}
+
+.spotify-login-btn:hover {
+  opacity: 0.85;
+  transform: scale(1.03);
+}
+
+.spotify-login-btn.connected {
+  background: #1db954;
+  opacity: 0.6;
+}
