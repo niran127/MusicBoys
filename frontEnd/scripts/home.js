@@ -13,9 +13,12 @@ const zoekVeld = document.getElementById("zoekVeld");
 
 const homeKnop = document.getElementById("homeKnop");
 const zoekenKnop = document.getElementById("zoekenKnop");
+const collectieKnop = document.getElementById("collectieKnop");
 const home = document.getElementById("home");
 const zoekPagina = document.getElementById("zoekPagina");
 const collectiePagina = document.getElementById("collectiePagina");
+const gamePagina = document.getElementById("gamePagina");
+const gameKnop = document.getElementById("gameKnop");
 
 const resultaten = document.getElementById("resultaten");
 
@@ -31,6 +34,11 @@ const lijst = document.getElementById("lijst");
 
 const countLike = document.getElementById("countLike");
 
+const genereerKnop = document.getElementById("genereerKnop");
+
+const lijstGeg = document.getElementById("lijstGeg");
+
+let genre = ""; 
 
 let data;
 const likedSongs = [];
@@ -77,6 +85,26 @@ async function getArtiest(naamArtiest,zoekInstelling ) {
         console.error("Technische fout:", error);
     }
 }
+async function getTrackByGenre() {
+    try {
+        const token = await getAccessToken();
+
+        const eersteGenre = genre.split(',')[0].trim();
+
+        const response = await fetch(`https://api.spotify.com/v1/search?q=$genre:${eersteGenre}&type=track&limit=10`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+        console.log("Genre data:", data);
+        return data;
+        
+    } catch (error) {
+        console.error("Technische fout bij genre zoeken:", error);
+    }
+}
 
 function getSimilarityScore(text, search) {
   if (text === search) return 100;      // Exacte match (hoogste prio)
@@ -96,6 +124,7 @@ chill.addEventListener('click', function() {
     workout.classList.remove("selecteerd");
 
     moodHeader.innerHTML = "Mood: chill"
+    genre = "Lo-fi,easy listening,new age,indie pop,alternative r&b"
 });
 
 focus.addEventListener('click', function() {
@@ -106,6 +135,7 @@ focus.addEventListener('click', function() {
     workout.classList.remove("selecteerd");
 
     moodHeader.innerHTML = "Mood: focus"
+    genre = "Easy listening,soft rock,alternative,indie,slowcore"
 });
 
 party.addEventListener('click', function() {
@@ -116,6 +146,7 @@ party.addEventListener('click', function() {
     workout.classList.remove("selecteerd");
 
     moodHeader.innerHTML = "Mood: party"
+    genre = "Pop Rock,K-Pop,Hyperpop,nightcore,bubblegum pop"
 });
 
 sad.addEventListener('click', function() {
@@ -126,6 +157,7 @@ sad.addEventListener('click', function() {
     workout.classList.remove("selecteerd");
 
     moodHeader.innerHTML = "Mood: sad"
+    genre = "Emo,indie punk,slowcore,new age,alternative,indie"
 });
 
 workout.addEventListener('click', function() {
@@ -136,6 +168,7 @@ workout.addEventListener('click', function() {
     chill.classList.remove("selecteerd");
 
     moodHeader.innerHTML = "Mood: workout"
+    genre = "hardstyle,work-out"
 });
 
 
@@ -251,7 +284,7 @@ zoekKnop.addEventListener('click',async()=>{
 homeKnop.addEventListener("click",()=>{
     zoekenKnop.classList.remove("aanwezig");
     homeKnop.classList.add("aanwezig");
-    collectieKnop.remove("aanwezig");
+    collectieKnop.classList.remove("aanwezig");
 
     collectiePagina.style.display = "none";
     home.style.display = "block";
@@ -293,11 +326,17 @@ duurtijdsort.addEventListener("click",()=>{
 likeNummers.addEventListener("click",()=>{
     likeNummers.classList.add("colSel");
     gegNummers.classList.remove("colSel");
+
+    lijst.style.display = "block";
+    lijstGeg.style.display = "none";
 })
 
 gegNummers.addEventListener("click",()=>{
     gegNummers.classList.add("colSel");
     likeNummers.classList.remove("colSel");
+
+    lijstGeg.style.display = "block";
+    lijst.style.display = "none";
 })
 
 
@@ -367,7 +406,8 @@ likeNummers.addEventListener("click", async () => {
                 </li>
         `
     }).join("");
-     songs = [];
+    lijst.display = "block"
+    songs = [];
     console.log(songs);
     actieveerKnoppen()
    });
@@ -391,3 +431,26 @@ async function getSongById(id) {
     }
 }
 
+genereerKnop.addEventListener("click", async () => {
+    const data = await getTrackByGenre(); 
+    
+    // Check of er wel data en tracks zijn teruggekomen
+    if (data && data.tracks && data.tracks.items) {
+        lijstGeg.innerHTML = data.tracks.items.map((el) => {
+            return `
+                <li>
+                    <img src="${el.album.images[0].url}" alt="">
+                    <div>
+                        <h4>${el.name}</h4>
+                        <p>${el.artists[0].name} ° ${el.album.name}</p>
+                    </div>
+                    <button class="likeButton ${likedSongs.indexOf(el.id) === -1 ? '' : 'geliked'}" id="${el.id}">Like</button>
+                </li>
+            `;
+        }).join("");
+        
+        actieveerKnoppen(); // Vergeet niet de like-knoppen weer te activeren!
+    } else {
+        lijstGeg.innerHTML = "<li>Geen nummers gevonden voor dit genre.</li>";
+    }
+});

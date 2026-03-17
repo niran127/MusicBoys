@@ -63,14 +63,18 @@ main{
 .mood ul{
     display: grid;
     grid-template-columns: repeat(5,1fr);
-    gap: 1rem;
+    gap: 0.5rem;
 }
 
 .mood ul li{
     margin-top: 1rem;
     text-align: center;
     border: 0.1px solid black;
-    padding: 1.5rem;
+    padding: 1.5rem 0;
+}
+
+.mood ul li:hover{
+    cursor: pointer;
 }
 
 .snelleActies > ul {
@@ -316,12 +320,12 @@ footer ul li {
 #collectiePagina{
     padding: 2rem;
 }
-#lijst{
+#lijst, #lijstGeg{
     display: grid;
     grid-template-columns: 1fr;
     gap: 0.5rem;
 }
-#lijst li{
+#lijst li, #lijstGeg li{
     border: black solid 1px;
     height: 4rem;
     padding: 0.5rem;
@@ -329,22 +333,22 @@ footer ul li {
     grid-template-columns: 1fr 6fr 1fr;
 }
 
-#lijst li img{
+#lijst li img, #lijstGeg li img{
     width: 3rem;
     height: 3rem;
 }
 
-#lijst li div{
+#lijst li div, #lijstGeg li div{
     margin-bottom: auto;
     margin-top: auto;
 }
 
-#lijst li button{
+#lijst li button, #lijstGeg li button{
     
     border: 1px black solid;
 }
 
-#lijst li button:hover{
+#lijst li button:hover, #lijstGeg li button:hover{
     opacity: 0.9;
 }
 

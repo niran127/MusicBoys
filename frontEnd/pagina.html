@@ -82,7 +82,7 @@
             <li id="collectiePagina" style="display: none;">
                 <div id="colHeader">
                     <h1>Mijn collectie</h1>
-                    <button id="countLike">nummers gelikete: 0</button><button>Genereer</button>
+                    <button id="countLike">nummers gelikete: 0</button><button id="genereerKnop">Genereer</button>
                 </div>
                 <div class="dropdown">
                 <button id="dropbtn" class="dropbtn">sorteer op: populariteit</button>
@@ -96,8 +96,38 @@
                     <p id="likeNummers">Gelikete nummers</p>
                     <p id="gegNummers">gegenereerde playlisten</p>
                 </div>
-                <ul id="lijst">
+                <ul id="lijst" style="display: none;">
                     
+                </ul>
+                <ul id="lijstGeg" style="display: none;">
+
+                </ul>
+            </li>
+            <li id="gamePagina" style="display: none;">
+                <h1>Guess the song</h1>
+                <div>
+                    <img src="" alt="">
+                    <button>Play</button>
+                </div>
+                <ul>
+                    <li><h3>Raad de titel of artiest</h3></li>
+                    <li><input type="text" placeholder="Type om te zoeken..."></li>
+                    <ul id="resultatenGame">
+                        <li>track name * artist</li>
+                        <li>track name * artist</li>
+                    </ul>
+                </ul>
+                <div>
+                    <button>skip</button>
+                    <button>controleer antwoord</button>
+                </div>
+                <div><p>getal</p>
+                <p>Gespeeld</p></div>
+                <div><p>getal</p>
+                <p>correct</p></div>
+                <div><p>getal%</p>
+                <p>score</p></div>
+            </li>
         </ul>
     </main>
     <footer>
