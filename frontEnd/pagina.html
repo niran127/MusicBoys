@@ -39,7 +39,7 @@
                 <div class="snelleActies">
                     <h2>Snelle acties</h2>
                     <ul>
-                        <li>
+                        <li id="zoekMuziek">
                             <div></div>
                             <ul>
                                 <li><strong>Zoek muziek</strong></li>
@@ -47,7 +47,7 @@
                             </ul>
                             <img src="./fotos/pijl.jpg" alt="pijl">
                         </li>
-                        <li>
+                        <li id="bekijkLikeNummers">
                             <div></div>
                             <ul>
                                 <li><strong>Mijn collectie</strong></li>
@@ -55,7 +55,7 @@
                             </ul>
                             <img src="./fotos/pijl.jpg" alt="pijl">
                         </li>
-                        <li>
+                        <li id="genNummersSnel">
                             <div></div>
                             <ul>
                                 <li><strong>Genereer playlist</strong></li>
@@ -82,6 +82,7 @@
             <li id="collectiePagina" style="display: none;">
                 <div id="colHeader">
                     <h1>Mijn collectie</h1>
+                    <button id="countLikeArtiest">artiesten gelikete:0</button>
                     <button id="countLike">nummers gelikete: 0</button><button id="genereerKnop">Genereer</button>
                 </div>
                 <div class="dropdown">
@@ -93,6 +94,7 @@
                 </div>
                 </div>
                 <div id="lijstenSelecteren">
+                    <p id="likeArtiestenK">Gelikete artiesten</p>
                     <p id="likeNummers">Gelikete nummers</p>
                     <p id="gegNummers">gegenereerde playlisten</p>
                 </div>
@@ -102,31 +104,33 @@
                 <ul id="lijstGeg" style="display: none;">
 
                 </ul>
+                
             </li>
             <li id="gamePagina" style="display: none;">
                 <h1>Guess the song</h1>
                 <div>
-                    <img src="" alt="">
-                    <button>Play</button>
+                    <img src="./fotos/symboolGame.svg" alt="">
+                    <button id="play">Play</button>
                 </div>
                 <ul>
-                    <li><h3>Raad de titel of artiest</h3></li>
-                    <li><input type="text" placeholder="Type om te zoeken..."></li>
+                    <li><h3>Raad de titel</h3></li>
+                    <li><input type="text" id="searchResultatenGame" placeholder="Type om te zoeken..."></li>
                     <ul id="resultatenGame">
-                        <li>track name * artist</li>
-                        <li>track name * artist</li>
+                        
                     </ul>
                 </ul>
                 <div>
-                    <button>skip</button>
-                    <button>controleer antwoord</button>
+                    <button id="skip">skip</button>
+                    <button id="controleer">controleer antwoord</button>
                 </div>
-                <div><p>getal</p>
-                <p>Gespeeld</p></div>
-                <div><p>getal</p>
-                <p>correct</p></div>
-                <div><p>getal%</p>
-                <p>score</p></div>
+                <div>
+                    <div><p id="gespeeld">0</p>
+                    <p>Gespeeld</p></div>
+                    <div><p id="correct">0</p>
+                    <p>Correct</p></div>
+                    <div><p id="score">0%</p>
+                    <p>score</p></div>
+                </div>
             </li>
         </ul>
     </main>
