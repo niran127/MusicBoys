@@ -381,16 +381,16 @@ likeArtiestenK.addEventListener("click",async()=>{
     lijst.style.display = "block";
     lijstGeg.style.display = "none";
 
-// Zorg dat artiestenA leeg start bij elke klik
+
     let artiestenA = []; 
 
-    // 2. Loop door de ARTIESTEN lijst, niet de songs lijst
+    
     for (const id of likeArtiesten) { 
         const artiest = await getArtiestById(id);
         if (artiest) artiestenA.push(artiest);
     }
 
-    // 3. Vul de JUISTE lijst (lijstGeg)
+    
     lijst.innerHTML = artiestenA.sort((a, b) => {
         if (dropbtn.innerHTML.includes("alphabetisch")) {
             return a.name.localeCompare(b.name);
@@ -398,7 +398,7 @@ likeArtiestenK.addEventListener("click",async()=>{
             return (b.popularity || 0) - (a.popularity || 0);
         }
     }).map((el) => {
-        // Veiligheidscheck voor afbeelding
+        
         const imgUrl = el.images && el.images.length > 0 ? el.images[0].url : 'placeholder.jpg';
         
         return `
@@ -412,18 +412,18 @@ likeArtiestenK.addEventListener("click",async()=>{
         `;
     }).join("");
 
-    // 4. Activatie
+    
     actieveerArtiestKnoppen();
 })
 
 gegNummers.addEventListener("click", async () => {
-    // 1. UI Wisselen
+    
     gegNummers.classList.add("colSel");
     likeNummers.classList.remove("colSel");
     likeArtiestenK.classList.remove("colSel");
 
-    lijstGeg.style.display = "block"; // Deze toon je...
-    lijst.style.display = "none";    // ...en deze verberg je
+    lijstGeg.style.display = "block"; 
+    lijst.style.display = "none";    
 
     
 });
@@ -452,7 +452,7 @@ function actieveerPlayKnoppen(){
     const playKnoppen = document.querySelectorAll(".playKnop");
     console.log("play knoppen laden")
     playKnoppen.forEach(button => {
-        // Verwijder eventuele oude listeners om dubbele kliks te voorkomen
+        
         button.replaceWith(button.cloneNode(true));
     });
 
@@ -472,7 +472,7 @@ function actieveerArtiestKnoppen() {
     const artiestButtons = document.querySelectorAll('.likeArtiest');
     
     artiestButtons.forEach(button => {
-        // Voorkom dubbele listeners
+        
         button.replaceWith(button.cloneNode(true));
     });
 
@@ -495,7 +495,7 @@ function actieveerArtiestKnoppen() {
                 console.log("Artiest verwijderd:", artiestId);
             }
             countLikeArtiest.innerHTML = `artiesten gelikete: ${likeArtiesten.length}`
-            // Update je teller (optioneel, of maak een aparte teller voor artiesten)
+           
             console.log("Gelikete artiesten:", likeArtiesten);
         });
     });
@@ -503,19 +503,17 @@ function actieveerArtiestKnoppen() {
 
 function actieveerKnoppen() {
     const likeButtons = document.querySelectorAll('.likeButton');
-    console.log("Aantal knoppen gevonden:", likeButtons.length); // Check je console!
+    console.log("Aantal knoppen gevonden:", likeButtons.length); 
 
     likeButtons.forEach(button => {
-        // Verwijder eventuele oude listeners om dubbele kliks te voorkomen
         button.replaceWith(button.cloneNode(true));
     });
 
-    // Selecteer ze opnieuw na het clonen
     const freshButtons = document.querySelectorAll('.likeButton');
 
     freshButtons.forEach(button => {
         button.addEventListener('click', function(e) {
-            e.preventDefault(); // Voorkom dat de pagina herlaadt
+            e.preventDefault(); 
             
             const knopId = this.id; 
             const index = likedSongs.indexOf(knopId);
@@ -540,19 +538,17 @@ function actieveerKnoppen() {
 
 function actieveerKnoppen() {
     const likeButtons = document.querySelectorAll('.likeButton');
-    console.log("Aantal knoppen gevonden:", likeButtons.length); // Check je console!
+    console.log("Aantal knoppen gevonden:", likeButtons.length); 
 
     likeButtons.forEach(button => {
-        // Verwijder eventuele oude listeners om dubbele kliks te voorkomen
         button.replaceWith(button.cloneNode(true));
     });
 
-    // Selecteer ze opnieuw na het clonen
     const freshButtons = document.querySelectorAll('.likeButton');
 
     freshButtons.forEach(button => {
         button.addEventListener('click', function(e) {
-            e.preventDefault(); // Voorkom dat de pagina herlaadt
+            e.preventDefault(); 
             
             const knopId = this.id; 
             const index = likedSongs.indexOf(knopId);
@@ -630,7 +626,6 @@ async function getSongById(id) {
 genereerKnop.addEventListener("click", async () => {
     const data = await getTrackByGenre(); 
     
-    // Check of er wel data en tracks zijn teruggekomen
     if (data && data.tracks && data.tracks.items) {
         lijstGeg.innerHTML = data.tracks.items.map((el) => {
             return `
