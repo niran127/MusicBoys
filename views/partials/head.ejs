@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="nl">
+   <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="stylesheet" href="/styles/reset.css" />
+      <link rel="stylesheet" href="/styles/variables.css" />
+      <link rel="stylesheet" href="/styles/layout.css" />
+      <link rel="stylesheet" href="/styles/sidebar.css" />
+      <link rel="stylesheet" href="/styles/player.css" />
+      <link rel="stylesheet" href="/styles/home-page.css" />
+      <link rel="stylesheet" href="/styles/search-page.css" />
+      <link rel="stylesheet" href="/styles/tracks.css" />
+      <link rel="stylesheet" href="/styles/playlist-page.css" />
+      <link rel="stylesheet" href="/styles/detail-page.css" />
+      <link rel="stylesheet" href="/styles/game.css" />
+      <!-- laadt de sdk voordat de home.js file wordt geladen, anders BIG BUGS -->
+      <script>
+         window._spSDKFired = false;
+         window.onSpotifyWebPlaybackSDKReady = function () {
+           window._spSDKFired = true;
+           if (window._initSpotifyPlayer) window._initSpotifyPlayer();
+         };
+      </script>
+      <script src="/scripts/spotify.js" defer></script>
+      <script src="/scripts/ui-utils.js" defer></script>
+      <script src="/scripts/navigation.js" defer></script>
+      <script src="/scripts/playlists.js" defer></script>
+      <script src="/scripts/search.js" defer></script>
+      <script src="/scripts/home.js" defer></script>
+      <script src="/scripts/game.js" defer></script>
+      <script src="https://sdk.scdn.co/spotify-player.js" async></script>
+      <title>MusicBoys</title>
+   </head>
+   <body>
