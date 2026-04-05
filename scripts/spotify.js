@@ -40,24 +40,37 @@ async function spotifyLogin() {
   window.location.href = url;
 }
 async function exchangeCode(code) {
-  const res = await fetch("https://accounts.spotify.com/api/token", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      client_id: SP_CLIENT_ID,
-      grant_type: "authorization_code",
-      code,
-      redirect_uri: SP_REDIRECT_URI,
-      code_verifier: localStorage.getItem("sp_pkce"),
-    }),
-  });
-  const d = await res.json();
-  if (d.access_token) {
-    storeTokens(d);
+  try {
+    const res = await fetch("https://accounts.spotify.com/api/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        client_id: SP_CLIENT_ID,
+        grant_type: "authorization_code",
+        code,
+        redirect_uri: SP_REDIRECT_URI,
+        code_verifier: localStorage.getItem("sp_pkce"),
+      }),
+    });
+    
+    if (!res.ok) {
+        const errText = await res.text();
+        console.error("[MusicBoys] Token exchange failed:", res.status, errText);
+        window.history.replaceState({}, "", window.location.pathname);
+        return null;
+    }
+
+    const d = await res.json();
+    if (d.access_token) {
+      storeTokens(d);
+      window.history.replaceState({}, "", window.location.pathname);
+      return d.access_token;
+    }
+  } catch (err) {
+    console.error("[MusicBoys] Exchange code error:", err);
     window.history.replaceState({}, "", window.location.pathname);
-    return d.access_token;
   }
   return null;
 }
@@ -285,6 +298,8 @@ function wirePlayerControls() {
     const pct = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
     spPlayer?.setVolume(pct * VOLUME_LIMIT);
     document.querySelector(".vol-fill").style.width = `${pct * 100}%`;
+    // volume globaal opslaan voor andere scripts (bv game)
+    localStorage.setItem("app_volume_pct", pct);
   });
 }
 // player bar bijwerken met metadata
@@ -452,11 +467,26 @@ function loadPlayerFromStorage() {
 }
 // opstarten: oAuth callback en login check
 (async () => {
-  const code = new URLSearchParams(window.location.search).get("code");
-  if (code) await exchangeCode(code);
-  setLoginBtn(spIsLoggedIn() ? "loading" : "disconnected");
-  if (window._spSDKFired && spIsLoggedIn()) {
-    window._initSpotifyPlayer();
-  }
-  loadPlayerFromStorage();
+    try {
+        const code = new URLSearchParams(window.location.search).get("code");
+        if (code) {
+            await exchangeCode(code);
+        }
+        
+        const loggedIn = spIsLoggedIn();
+        setLoginBtn(loggedIn ? "loading" : "disconnected");
+        
+        if (window._spSDKFired && loggedIn) {
+            window._initSpotifyPlayer();
+        }
+        
+        loadPlayerFromStorage();
+    } catch (err) {
+        console.error("[MusicBoys] Kritieke fout bij opstarten:", err);
+        // Clear de URL zowiezo als er een code staat, anders blijven we hangen
+        if (window.location.search.includes("code=")) {
+            window.history.replaceState({}, "", window.location.pathname);
+        }
+        setLoginBtn("disconnected");
+    }
 })();

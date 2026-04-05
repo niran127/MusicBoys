@@ -13,6 +13,7 @@
       <link rel="stylesheet" href="./styles/tracks.css" />
       <link rel="stylesheet" href="./styles/playlist-page.css" />
       <link rel="stylesheet" href="./styles/detail-page.css" />
+      <link rel="stylesheet" href="./styles/game.css" />
       <!-- laadt de sdk voordat de home.js file wordt geladen, anders BIG BUGS -->
       <script>
          window._spSDKFired = false;
@@ -27,6 +28,7 @@
       <script src="./scripts/playlists.js" defer></script>
       <script src="./scripts/search.js" defer></script>
       <script src="./scripts/home.js" defer></script>
+      <script src="./scripts/game.js" defer></script>
       <script src="https://sdk.scdn.co/spotify-player.js" async></script>
       <title>MusicBoys</title>
    </head>
@@ -445,6 +447,8 @@
          </div>
          <!-- detail pagina -->
          <div id="page-detail" style="display: none"></div>
+         <!-- game pagina -->
+         <div id="page-game" style="display: none"></div>
       </main>
       <!-- player bar -->
       <footer>

@@ -5,9 +5,11 @@ function showPage(page, playlistName = null) {
   const pageLikes = document.getElementById("page-likes");
   const pagePlaylist = document.getElementById("page-playlist");
   const pageDetail = document.getElementById("page-detail");
+  const pageGame = document.getElementById("page-game");
   const navHome = document.getElementById("nav-home");
   const navZoeken = document.getElementById("nav-zoeken");
   const navLikes = document.getElementById("nav-likes");
+  const navGame = document.getElementById("nav-game");
   if (page !== "detail") {
     currentPage = page;
   }
@@ -16,9 +18,11 @@ function showPage(page, playlistName = null) {
   if (pageLikes) pageLikes.style.display = "none";
   if (pagePlaylist) pagePlaylist.style.display = "none";
   if (pageDetail) pageDetail.style.display = "none";
+  if (pageGame) pageGame.style.display = "none";
   navHome.classList.remove("active");
   navZoeken.classList.remove("active");
   if (navLikes) navLikes.classList.remove("active");
+  if (navGame) navGame.classList.remove("active");
   document
     .querySelectorAll("#custom-playlists-list .nav-item")
     .forEach((item) => {
@@ -43,6 +47,12 @@ function showPage(page, playlistName = null) {
     }
   } else if (page === "detail") {
     if (pageDetail) pageDetail.style.display = "flex";
+  } else if (page === "game") {
+    if (pageGame) {
+      pageGame.style.display = "flex";
+      if (navGame) navGame.classList.add("active");
+      if (typeof initGame === "function") initGame();
+    }
   }
 }
 // detailpagina

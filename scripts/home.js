@@ -55,6 +55,9 @@ document
   .getElementById("nav-zoeken")
   ?.addEventListener("click", () => showPage("zoeken"));
 document
+  .getElementById("nav-game")
+  ?.addEventListener("click", () => showPage("game"));
+document
   .getElementById("nav-likes")
   ?.addEventListener("click", () => showPage("likes"));
 document
