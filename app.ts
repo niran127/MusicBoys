@@ -13,6 +13,10 @@ app.use(express.urlencoded({ extended:true}));
 
 app.use("/musicMatch",musicMatch());
 
+app.get("/",(_,res)=>{
+    res.redirect("/musicMatch");
+})
+
 app.listen(app.get("port"),()=>{
     console.log("http://localhost:1234");
 })

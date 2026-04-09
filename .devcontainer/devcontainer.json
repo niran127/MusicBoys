@@ -3,7 +3,10 @@
 {
 	"name": "Alpine",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/base:alpine-3.22"
+	"image": "mcr.microsoft.com/devcontainers/base:alpine-3.22",
+	"features": {
+		"ghcr.io/stu-bell/devcontainer-features/node:0": {}
+	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
