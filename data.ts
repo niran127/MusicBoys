@@ -80,7 +80,7 @@ async function getAuthToken() {
 
 async function spotifySearch(query: string, type: string) {
     const token = await getAuthToken();
-    const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=${type}&limit=5`;
+    const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=${type}&limit=8`;
     
     const response = await fetch(url, {
         headers: { "Authorization": `Bearer ${token}` },
@@ -103,7 +103,7 @@ export async function searchHandler(query:string,type:string){
       } else {
         return artists.artists.items.map((el:any)=>{
             return {
-                type:type,
+                type:"artist",
                 img: el.images[0],
                 name:el.name,
                 uri:el.uri
@@ -117,7 +117,7 @@ export async function searchHandler(query:string,type:string){
       } else {
         return tracks.tracks.items.map((el)=>{
             return{
-                type:type,
+                type:"track",
                 img:el.album.images[0],
                 name:el.name,
                 artistsStr:el.artists.map((el)=>el.name).join(","),
@@ -132,7 +132,7 @@ export async function searchHandler(query:string,type:string){
       if (data.artists && data.artists.items) {
          art = data.artists.items.map((el:any)=>{
             return {
-                type:type,
+                type:"artist",
                 img: el.images[0],
                 name:el.name,
                 uri:el.uri
@@ -142,10 +142,10 @@ export async function searchHandler(query:string,type:string){
       if (data.tracks && data.tracks.items) {
          tra = data.tracks.items.map((el:any)=>{
             return{
-                type:type,
+                type:"track",
                 img:el.album.images[0],
                 name:el.name,
-                artistsStr:el.artists.join(","),
+                artistsStr:el.artists.map((el:any)=>el.name).join(","),
                 artistUri:el.artists[0].id,
                 uri:el.uri
             }
@@ -162,6 +162,6 @@ export async function searchHandler(query:string,type:string){
         const popB = b.popularity || 0;
         return popB - popA;
       });
-      return allItems;
+      return allItems.slice(0,8);
       }
     }
