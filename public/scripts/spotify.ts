@@ -1,18 +1,28 @@
-const SP_CLIENT_ID = "7c5773b9dcc149b38a50f1d7d83c34a7";
-const SP_CLIENT_SECRET = "f9a584351aac45889f29e806274d73c4";
-const SP_REDIRECT_URI = "http://127.0.0.1:3050";
-const SP_SCOPES =
+const SP_CLIENT_ID: string = "7c5773b9dcc149b38a50f1d7d83c34a7";
+const SP_CLIENT_SECRET: string = "f9a584351aac45889f29e806274d73c4";
+
+declare global {
+    interface Window {
+        onSpotifyWebPlaybackSDKReady: () => void;
+        _spSDKFired: boolean;
+        _initSpotifyPlayer: () => void;
+        getTrackId: (uri: string) => string;
+    }
+    const Spotify: any;
+    const toggleGlobalLike: (uri: string, meta: any) => void;
+}
+const SP_REDIRECT_URI: string = "http://localhost:1234"; // Aangepast naar de lokale poort
+const SP_SCOPES: string =
   "streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state";
-// max volume regelaar, 1 is max, 0.5 is 50%
-const VOLUME_LIMIT = 0.5;
+const VOLUME_LIMIT: number = 0.5;
 // pkce helpers
-function genVerifier(len = 128) {
+function genVerifier(len: number = 128): string {
   const chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
   const vals = crypto.getRandomValues(new Uint8Array(len));
   return Array.from(vals, (v) => chars[v % chars.length]).join("");
 }
-async function genChallenge(verifier) {
+async function genChallenge(verifier: string): Promise<string> {
   const buf = await crypto.subtle.digest(
     "SHA-256",
     new TextEncoder().encode(verifier),
@@ -253,10 +263,7 @@ window._initSpotifyPlayer = async () => {
     if (state) updatePlayerBar(state);
   });
   spPlayer.addListener("account_error", () => {
-    showCustomModal({
-      title: "Spotify Premium",
-      message: "Helaas is Spotify Premium vereist voor het afspelen van muziek in deze applicatie.",
-    });
+    alert("Spotify Premium vereist voor afspelen.");
   });
   spPlayer.addListener("authentication_error", () => {
     spotifyLogout();

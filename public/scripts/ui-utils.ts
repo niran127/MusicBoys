@@ -1,13 +1,23 @@
+declare function getTrackId(uri: string): string;
+declare function getStoredCurrentTrack(): any;
+declare function updateLikesPage(): void;
+declare function getLikes(): any[];
+declare function setLikes(likes: any[]): void;
+declare function toggleGlobalLike(uri: string, meta: any): boolean;
+declare function showPlaylistMenu(e: MouseEvent, data: any): void;
+declare function showDetailPage(uri: string, type: string): void;
+declare function playSong(uris: string | string[], meta: any): Promise<void>;
+
 function renderTrackRow(
-  imageUrl,
-  name,
-  subtitle,
-  type,
-  trackUri = null,
-  isLiked = false,
-  artistUri = null,
-  artistNameMetadata = null,
-) {
+  imageUrl: string | null,
+  name: string,
+  subtitle: string,
+  type: string,
+  trackUri: string | null = null,
+  isLiked: boolean = false,
+  artistUri: string | null = null,
+  artistNameMetadata: string | null = null,
+): string {
   const eName = name.replace(/"/g, "&quot;");
   const eSub = subtitle.replace(/"/g, "&quot;");
   const eArtistMeta = (artistNameMetadata || subtitle).replace(/"/g, "&quot;");
@@ -57,12 +67,13 @@ function renderTrackRow(
   `;
 }
 // likes syncen
-function syncGlobalLikeUI(uri, isLiked) {
+function syncGlobalLikeUI(uri: string, isLiked: boolean): void {
   if (typeof getTrackId !== "function") return;
   const targetId = getTrackId(uri);
   // rij aanpassen
-  document.querySelectorAll(`.track-row[data-uri]`).forEach((row) => {
-    if (getTrackId(row.dataset.uri) === targetId) {
+  document.querySelectorAll(`.track-row[data-uri]`).forEach((el) => {
+    const row = el as HTMLElement;
+    if (row.dataset.uri && getTrackId(row.dataset.uri) === targetId) {
       const btn = row.querySelector(".track-like-btn");
       if (btn) btn.classList.toggle("liked", isLiked);
     }
@@ -74,14 +85,16 @@ function syncGlobalLikeUI(uri, isLiked) {
     if (playerLikeBtn) playerLikeBtn.classList.toggle("liked", isLiked);
   }
   const pageDetail = document.getElementById("page-detail");
-  const detailLikeBtn = pageDetail.querySelector(".detail-like-btn");
-  if (
-    detailLikeBtn &&
-    detailLikeBtn.dataset.uri &&
-    getTrackId(detailLikeBtn.dataset.uri) === targetId
-  ) {
-    detailLikeBtn.classList.toggle("liked", isLiked);
-    detailLikeBtn.textContent = isLiked ? "geliket" : "like";
+  if (pageDetail) {
+    const detailLikeBtn = pageDetail.querySelector(".detail-like-btn") as HTMLElement;
+    if (
+        detailLikeBtn &&
+        detailLikeBtn.dataset.uri &&
+        getTrackId(detailLikeBtn.dataset.uri) === targetId
+    ) {
+        detailLikeBtn.classList.toggle("liked", isLiked);
+        detailLikeBtn.textContent = isLiked ? "geliket" : "like";
+    }
   }
   const pageLikes = document.getElementById("page-likes");
   if (pageLikes && pageLikes.style.display !== "none") {
@@ -89,13 +102,13 @@ function syncGlobalLikeUI(uri, isLiked) {
   }
 }
 // gelikete nummers tonen
-function updateLikesPage() {
+function updateLikesPage(): void {
   const container = document.getElementById("likes-resultaten");
   if (!container) return;
   let likes = getLikes();
   // dubbelchecken
-  const uniqueLikes = [];
-  const seenIds = new Set();
+  const uniqueLikes: any[] = [];
+  const seenIds = new Set<string>();
   for (let i = 0; i < likes.length; i++) {
     const item = likes[i];
     const id = getTrackId(item.uri);
@@ -129,13 +142,15 @@ function updateLikesPage() {
   attachRowListeners(container);
 }
 
-function attachRowListeners(container) {
+function attachRowListeners(container: HTMLElement | null): void {
+  if (!container) return;
   // likes instellen
   const likeBtns = container.querySelectorAll(".track-like-btn");
   likeBtns.forEach((btn) => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const row = btn.closest(".track-row");
+      const row = btn.closest(".track-row") as HTMLElement;
+      if (!row || !row.dataset.uri) return;
       const isNowLiked = toggleGlobalLike(row.dataset.uri, {
         name: row.dataset.name,
         artist: row.dataset.artist,
@@ -151,9 +166,10 @@ function attachRowListeners(container) {
   addBtns.forEach((btn) => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      const row = btn.closest(".track-row");
+      const row = btn.closest(".track-row") as HTMLElement;
+      if (!row) return;
       if (typeof showPlaylistMenu === "function") {
-        showPlaylistMenu(e, {
+        showPlaylistMenu(e as MouseEvent, {
           uri: row.dataset.uri,
           meta: {
             name: row.dataset.name,
@@ -166,19 +182,21 @@ function attachRowListeners(container) {
     });
   });
   const rows = container.querySelectorAll(".track-row");
-  rows.forEach((row) => {
+  rows.forEach((el) => {
+    const row = el as HTMLElement;
     row.addEventListener("click", (e) => {
       const type = row.dataset.type;
       const uri = row.dataset.uri;
+      const target = e.target as HTMLElement;
       // op de titel drukken -> naar detailpagina
-      if (e.target.closest(".track-title-link")) {
+      if (target.closest(".track-title-link")) {
         e.stopPropagation();
         if (typeof showDetailPage === "function") {
-          showDetailPage(uri || row.dataset.artistUri, "track");
+          showDetailPage((uri || row.dataset.artistUri) || "", "track");
         }
         return;
       }
-      if (e.target.closest(".track-artist-link")) {
+      if (target.closest(".track-artist-link")) {
         e.stopPropagation();
         const aUri = row.dataset.artistUri;
         if (aUri && typeof showDetailPage === "function") {
@@ -187,20 +205,20 @@ function attachRowListeners(container) {
         return;
       }
       if (
-        e.target.closest(".track-like-btn") ||
-        e.target.closest(".track-add-btn")
+        target.closest(".track-like-btn") ||
+        target.closest(".track-add-btn")
       ) {
         return;
       }
       if (type === "Nummer" && uri) {
         const allRows = Array.from(
           container.querySelectorAll(".track-row[data-type='Nummer']"),
-        );
+        ) as HTMLElement[];
         const startIndex = allRows.indexOf(row);
-        const queueUris = [];
+        const queueUris: string[] = [];
         if (startIndex !== -1) {
           for (let i = startIndex; i < allRows.length; i++) {
-            if (allRows[i].dataset.uri) queueUris.push(allRows[i].dataset.uri);
+            if (allRows[i].dataset.uri) queueUris.push(allRows[i].dataset.uri!);
           }
         } else {
           queueUris.push(uri);
@@ -217,82 +235,9 @@ function attachRowListeners(container) {
       }
       if (type === "Artiest") {
         if (typeof showDetailPage === "function") {
-          showDetailPage(row.dataset.artistUri || uri, "artist");
+          showDetailPage((row.dataset.artistUri || uri) || "", "artist");
         }
       }
     });
-  });
-}
-
-/**
- * Toont een custom modal in plaats van browser native popups
- * @param {Object} options - { title, message, placeholder, confirmText, cancelText, showInput, isDanger, onConfirm }
- */
-function showCustomModal({
-  title = "Melding",
-  message = "",
-  placeholder = "Typ hier...",
-  confirmText = "OK",
-  cancelText = "Annuleren",
-  showInput = false,
-  isDanger = false,
-  onConfirm = null,
-}) {
-  // Verwijder oude modal als die er nog is
-  const oldModal = document.querySelector(".modal-overlay");
-  if (oldModal) oldModal.remove();
-
-  const overlay = document.createElement("div");
-  overlay.className = "modal-overlay";
-
-  overlay.innerHTML = `
-    <div class="modal-content">
-      <div class="modal-title">${title}</div>
-      <div class="modal-message">${message}</div>
-      ${showInput ? `<input type="text" class="modal-input" placeholder="${placeholder}" id="modal-input-field">` : ""}
-      <div class="modal-actions">
-        ${onConfirm ? `<button class="modal-btn modal-btn-cancel" id="modal-cancel-btn">${cancelText}</button>` : ""}
-        <button class="modal-btn ${isDanger ? "modal-btn-danger" : "modal-btn-confirm"}" id="modal-confirm-btn">${confirmText}</button>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(overlay);
-
-  // Vrijwel direct activeren voor de transitie
-  setTimeout(() => overlay.classList.add("active"), 10);
-
-  const inputEl = overlay.querySelector("#modal-input-field");
-  const confirmBtn = overlay.querySelector("#modal-confirm-btn");
-  const cancelBtn = overlay.querySelector("#modal-cancel-btn");
-
-  if (inputEl) {
-    inputEl.focus();
-    inputEl.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") confirmBtn.click();
-      if (e.key === "Escape") if (cancelBtn) cancelBtn.click(); else closeModal();
-    });
-  }
-
-  function closeModal() {
-    overlay.classList.remove("active");
-    setTimeout(() => overlay.remove(), 300);
-  }
-
-  confirmBtn.addEventListener("click", () => {
-    const value = inputEl ? inputEl.value : true;
-    if (onConfirm) onConfirm(value);
-    closeModal();
-  });
-
-  if (cancelBtn) {
-    cancelBtn.addEventListener("click", () => {
-      closeModal();
-    });
-  }
-
-  // Klikken buiten de modal om te sluiten
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) closeModal();
   });
 }

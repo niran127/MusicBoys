@@ -1,4 +1,9 @@
-function renderCustomPlaylists() {
+declare function showPage(page: string, data?: any): void;
+declare function renderTrackRow(img: string, name: string, artist: string, type: string, uri: string, isLiked: boolean, artistUri?: string): string;
+declare function attachRowListeners(container: HTMLElement | null): void;
+declare function getTrackId(uri: string): string;
+
+function renderCustomPlaylists(): void {
   const customPlaylistsList = document.getElementById("custom-playlists-list");
   if (!customPlaylistsList) return;
   const rawData = localStorage.getItem("spotify_custom_playlists");
@@ -19,7 +24,7 @@ function renderCustomPlaylists() {
     `;
   }
   customPlaylistsList.innerHTML = html;
-  const items = customPlaylistsList.querySelectorAll(".nav-item");
+  const items = customPlaylistsList.querySelectorAll(".nav-item") as NodeListOf<HTMLElement>;
   items.forEach((item) => {
     item.addEventListener("click", () => {
       if (typeof showPage === "function") {
@@ -28,8 +33,9 @@ function renderCustomPlaylists() {
     });
   });
 }
+
 // playlist inhoud tonen
-function showPlaylist(name) {
+function showPlaylist(name: string): void {
   const titleEl = document.getElementById("playlist-title");
   const resultsEl = document.getElementById("playlist-resultaten");
   if (!titleEl || !resultsEl) return;
@@ -60,15 +66,17 @@ function showPlaylist(name) {
   document
     .querySelectorAll("#custom-playlists-list .nav-item")
     .forEach((item) => {
-      if (item.dataset.name === name) {
-        item.classList.add("active");
+      const hItem = item as HTMLElement;
+      if (hItem.dataset.name === name) {
+        hItem.classList.add("active");
       } else {
-        item.classList.remove("active");
+        hItem.classList.remove("active");
       }
     });
 }
+
 // menu tonen om toe te voegen
-function showPlaylistMenu(e, trackData) {
+function showPlaylistMenu(e: MouseEvent, trackData: any): void {
   const oldMenus = document.querySelectorAll(".playlist-menu");
   oldMenus.forEach((m) => m.remove());
   const rawData = localStorage.getItem("spotify_custom_playlists");
@@ -77,7 +85,7 @@ function showPlaylistMenu(e, trackData) {
   const activePage = document.getElementById("page-playlist");
   const playlistTitleEl = document.getElementById("playlist-title");
   const currentPlaylistName = playlistTitleEl
-    ? playlistTitleEl.textContent
+    ? playlistTitleEl.textContent || ""
     : "";
   const isOnCurrentPlaylist = activePage && activePage.style.display !== "none";
   const menu = document.createElement("div");
@@ -101,10 +109,10 @@ function showPlaylistMenu(e, trackData) {
   document.body.appendChild(menu);
   menu.style.left = e.clientX - 170 + "px";
   menu.style.top = e.clientY + "px";
-  const addItems = menu.querySelectorAll(".playlist-menu-item.add");
+  const addItems = menu.querySelectorAll(".playlist-menu-item.add") as NodeListOf<HTMLElement>;
   addItems.forEach((item) => {
     item.addEventListener("click", () => {
-      addTrackToPlaylist(item.dataset.name, trackData);
+      addTrackToPlaylist(item.dataset.name || "", trackData);
       menu.remove();
     });
   });
@@ -116,12 +124,16 @@ function showPlaylistMenu(e, trackData) {
     });
   }
   setTimeout(() => {
-    window.addEventListener("click", () => menu.remove(), {
+    const handleOutsideClick = (): void => {
+        menu.remove();
+    };
+    window.addEventListener("click", handleOutsideClick, {
       once: true,
     });
   }, 10);
 }
-function addTrackToPlaylist(playlistName, trackData) {
+
+function addTrackToPlaylist(playlistName: string, trackData: any): void {
   const rawData = localStorage.getItem("spotify_custom_playlists");
   const playlists = JSON.parse(rawData || "{}");
   if (!playlists[playlistName]) return;
@@ -135,10 +147,7 @@ function addTrackToPlaylist(playlistName, trackData) {
     }
   }
   if (exists) {
-    showCustomModal({
-      title: "Informatie",
-      message: "Dit nummer staat al in de afspeellijst!",
-    });
+    alert("staat er al in!");
     return;
   }
   playlists[playlistName].push(trackData);
@@ -154,7 +163,8 @@ function addTrackToPlaylist(playlistName, trackData) {
     showPlaylist(playlistName);
   }
 }
-function removeTrackFromPlaylist(playlistName, trackUri) {
+
+function removeTrackFromPlaylist(playlistName: string, trackUri: string): void {
   const rawData = localStorage.getItem("spotify_custom_playlists");
   const playlists = JSON.parse(rawData || "{}");
   if (!playlists[playlistName]) return;
