@@ -1,10 +1,25 @@
+declare function spIsLoggedIn(): boolean;
+declare function spotifyGetMe(): Promise<any>;
+declare function showPage(page: string, data?: any): void;
+declare function renderCustomPlaylists(): void;
+declare function getTrackId(uri: string): string;
+declare function getLikes(): any[];
+declare function setLikes(likes: any[]): void;
+declare function syncGlobalLikeUI(uri: string, isLiked: boolean): void;
+declare function playSong(uris: string | string[], meta: any): Promise<void>;
+declare function handleSearch(): void;
+declare function showDetailPage(uri: string, type: string): void;
+declare function getStoredCurrentTrack(): any;
+
+declare var zoekInstelling: string;
+
 // Greeting functie: bepaald adhv tijd wat de begroeting is
 const greetingEl = document.getElementById("greeting");
 
-function setGreeting(name = "gebruiker") {
+function setGreeting(name: string = "gebruiker"): void {
   if (!greetingEl) return;
   const hour = new Date().getHours();
-  let greeting;
+  let greeting: string;
   if (hour >= 6 && hour < 12) {
     greeting = "Goedemorgen";
   } else if (hour < 18) {
@@ -19,7 +34,7 @@ function setGreeting(name = "gebruiker") {
   }
 }
 // naam ophalen van spotify
-(async function initGreeting() {
+(async function initGreeting(): Promise<void> {
   if (typeof spIsLoggedIn === "function" && spIsLoggedIn()) {
     try {
       const me = await spotifyGetMe();
@@ -37,13 +52,13 @@ function setGreeting(name = "gebruiker") {
 const moods = document.querySelectorAll(".mood-chip");
 const sidebarMood = document.getElementById("sidebar-mood");
 for (let i = 0; i < moods.length; i++) {
-  moods[i].addEventListener("click", function () {
+  moods[i].addEventListener("click", function (this: HTMLElement) {
     for (let j = 0; j < moods.length; j++) {
       moods[j].classList.remove("selected");
     }
     this.classList.add("selected");
     if (sidebarMood) {
-      sidebarMood.textContent = this.dataset.mood;
+      sidebarMood.textContent = this.dataset.mood || "";
     }
   });
 }
@@ -68,32 +83,19 @@ document
   ?.addEventListener("click", () => showPage("likes"));
 // nieuwe playlist
 document.getElementById("nav-new-playlist")?.addEventListener("click", () => {
-  showCustomModal({
-    title: "Nieuwe Playlist",
-    message: "Hoe wil je je nieuwe playlist noemen?",
-    showInput: true,
-    placeholder: "Bv. og katy perry on top",
-    onConfirm: (name) => {
-      if (name && name.trim()) {
-        const rawData = localStorage.getItem("spotify_custom_playlists");
-        const playlists = JSON.parse(rawData || "{}");
-        if (playlists[name]) {
-          showCustomModal({
-            title: "Oeps!",
-            message: "Deze playlist bestaat al!",
-          });
-          return;
-        }
-        playlists[name] = [];
-        localStorage.setItem(
-          "spotify_custom_playlists",
-          JSON.stringify(playlists),
-        );
-        renderCustomPlaylists();
-        showPage("playlist", name);
-      }
-    },
-  });
+  const name = prompt("Naam van je nieuwe playlist:");
+  if (name && name.trim()) {
+    const rawData = localStorage.getItem("spotify_custom_playlists");
+    const playlists = JSON.parse(rawData || "{}");
+    if (playlists[name]) {
+      alert("Deze playlist bestaat al!");
+      return;
+    }
+    playlists[name] = [];
+    localStorage.setItem("spotify_custom_playlists", JSON.stringify(playlists));
+    renderCustomPlaylists();
+    showPage("playlist", name);
+  }
 });
 // playlist verwijderen
 document
@@ -101,26 +103,24 @@ document
   ?.addEventListener("click", () => {
     const titleEl = document.getElementById("playlist-title");
     const name = titleEl ? titleEl.textContent : "";
-    showCustomModal({
-      title: "Playlist verwijderen",
-      message: `Weet je zeker dat je de playlist '${name}' wilt verwijderen?`,
-      confirmText: "Verwijderen",
-      isDanger: true,
-      onConfirm: () => {
-        const rawData = localStorage.getItem("spotify_custom_playlists");
-        const playlists = JSON.parse(rawData || "{}");
-        delete playlists[name];
-        localStorage.setItem(
-          "spotify_custom_playlists",
-          JSON.stringify(playlists),
-        );
-        renderCustomPlaylists();
-        showPage("home");
-      },
-    });
+    if (name && 
+      confirm(
+        "Weet je zeker dat je de playlist '" + name + "' wilt verwijderen?",
+      )
+    ) {
+      const rawData = localStorage.getItem("spotify_custom_playlists");
+      const playlists = JSON.parse(rawData || "{}");
+      delete playlists[name];
+      localStorage.setItem(
+        "spotify_custom_playlists",
+        JSON.stringify(playlists),
+      );
+      renderCustomPlaylists();
+      showPage("home");
+    }
   });
 
-function toggleGlobalLike(uri, meta) {
+function toggleGlobalLike(uri: string, meta: any): boolean {
   if (!uri) return false;
   const targetId = getTrackId(uri);
   let likes = getLikes();
@@ -133,11 +133,7 @@ function toggleGlobalLike(uri, meta) {
   }
   const isNowLiked = foundIndex === -1;
   if (foundIndex !== -1) {
-    const newLikes = [];
-    for (let i = 0; i < likes.length; i++) {
-      if (i !== foundIndex) newLikes.push(likes[i]);
-    }
-    likes = newLikes;
+    likes.splice(foundIndex, 1);
   } else {
     likes.unshift({
       uri,
@@ -152,24 +148,23 @@ function toggleGlobalLike(uri, meta) {
 document.getElementById("play-likes-btn")?.addEventListener("click", () => {
   const likes = getLikes();
   if (likes.length === 0) return;
-  const uris = [];
-  for (let i = 0; i < likes.length; i++) uris.push(likes[i].uri);
+  const uris = likes.map((l: any) => l.uri);
   playSong(uris, likes[0].meta);
 });
 document.getElementById("play-playlist-btn")?.addEventListener("click", () => {
   const titleEl = document.getElementById("playlist-title");
   const name = titleEl ? titleEl.textContent : "";
+  if (!name) return;
   const rawData = localStorage.getItem("spotify_custom_playlists");
   const playlists = JSON.parse(rawData || "{}");
   const tracks = playlists[name] || [];
   if (tracks.length === 0) return;
-  const uris = [];
-  for (let i = 0; i < tracks.length; i++) uris.push(tracks[i].uri);
+  const uris = tracks.map((t: any) => t.uri);
   playSong(uris, tracks[0].meta);
 });
 // zoek acties
 const zoekKnop = document.getElementById("zoekKnop");
-const zoekVeld = document.getElementById("zoekVeld");
+const zoekVeld = document.getElementById("zoekVeld") as HTMLInputElement;
 zoekKnop?.addEventListener("click", handleSearch);
 zoekVeld?.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
@@ -181,10 +176,10 @@ const filterAlles = document.getElementById("alles");
 const filterArtiesten = document.getElementById("artiesten");
 const filterNummer = document.getElementById("nummer");
 
-function updateFilterUI(activeBtn) {
+function updateFilterUI(activeBtn: HTMLElement | null): void {
   const filters = [filterAlles, filterArtiesten, filterNummer];
   for (let i = 0; i < filters.length; i++) {
-    if (filters[i]) filters[i].classList.remove("selected");
+    if (filters[i]) filters[i]!.classList.remove("selected");
   }
   if (activeBtn) activeBtn.classList.add("selected");
 }
@@ -200,7 +195,11 @@ filterNummer?.addEventListener("click", () => {
   zoekInstelling = "track";
   updateFilterUI(filterNummer);
 });
-renderCustomPlaylists();
+
+if (typeof renderCustomPlaylists === "function") {
+    renderCustomPlaylists();
+}
+
 // details vanuit player
 document.getElementById("now-art")?.addEventListener("click", () => {
   const current = getStoredCurrentTrack();
