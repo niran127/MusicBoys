@@ -83,6 +83,7 @@ document
   ?.addEventListener("click", () => showPage("likes"));
 // nieuwe playlist
 document.getElementById("nav-new-playlist")?.addEventListener("click", () => {
+<<<<<<< HEAD:public/scripts/home.js
   if (typeof spIsLoggedIn === "function" && !spIsLoggedIn()) {
     showCustomModal({
       title: "Inloggen vereist",
@@ -104,17 +105,39 @@ document.getElementById("nav-new-playlist")?.addEventListener("click", () => {
       if (name && name.trim()) {
         const playlists = window.getStoredPlaylists();
         if (playlists.some(p => p.name === name)) {
+=======
+  showCustomModal({
+    title: "Nieuwe Playlist",
+    message: "Hoe wil je je nieuwe playlist noemen?",
+    showInput: true,
+    placeholder: "Bv. og katy perry on top",
+    onConfirm: (name) => {
+      if (name && name.trim()) {
+        const rawData = localStorage.getItem("spotify_custom_playlists");
+        const playlists = JSON.parse(rawData || "{}");
+        if (playlists[name]) {
+>>>>>>> ef0f3bce5156da20c8e3971f35a8525443b7618a:scripts/home.js
           showCustomModal({
             title: "Oeps!",
             message: "Deze playlist bestaat al!",
           });
           return;
         }
+<<<<<<< HEAD:public/scripts/home.js
         const created = await window.createBackendPlaylist(name);
         if (created) {
            if (typeof window.renderCustomPlaylists === "function") window.renderCustomPlaylists();
            showPage("playlist", name);
         }
+=======
+        playlists[name] = [];
+        localStorage.setItem(
+          "spotify_custom_playlists",
+          JSON.stringify(playlists),
+        );
+        renderCustomPlaylists();
+        showPage("playlist", name);
+>>>>>>> ef0f3bce5156da20c8e3971f35a8525443b7618a:scripts/home.js
       }
     },
   });
@@ -130,12 +153,24 @@ document
       message: `Weet je zeker dat je de playlist '${name}' wilt verwijderen?`,
       confirmText: "Verwijderen",
       isDanger: true,
+<<<<<<< HEAD:public/scripts/home.js
       onConfirm: async () => {
         const playlists = window.getStoredPlaylists();
         const pl = playlists.find((p) => p.name === name);
         if (pl) {
           await window.deleteBackendPlaylist(pl._id);
         }
+=======
+      onConfirm: () => {
+        const rawData = localStorage.getItem("spotify_custom_playlists");
+        const playlists = JSON.parse(rawData || "{}");
+        delete playlists[name];
+        localStorage.setItem(
+          "spotify_custom_playlists",
+          JSON.stringify(playlists),
+        );
+        renderCustomPlaylists();
+>>>>>>> ef0f3bce5156da20c8e3971f35a8525443b7618a:scripts/home.js
         showPage("home");
       },
     });

@@ -113,6 +113,7 @@
   filter: brightness(1.1);
   transform: translateY(-1px);
 }
+<<<<<<< HEAD:public/styles/modals.css
 
 /* Toast Styles */
 .toast {
@@ -136,3 +137,5 @@
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+=======
+>>>>>>> ef0f3bce5156da20c8e3971f35a8525443b7618a:styles/modals.css
