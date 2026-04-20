@@ -1,25 +1,10 @@
-declare function spIsLoggedIn(): boolean;
-declare function spotifyGetMe(): Promise<any>;
-declare function showPage(page: string, data?: any): void;
-declare function renderCustomPlaylists(): void;
-declare function getTrackId(uri: string): string;
-declare function getLikes(): any[];
-declare function setLikes(likes: any[]): void;
-declare function syncGlobalLikeUI(uri: string, isLiked: boolean): void;
-declare function playSong(uris: string | string[], meta: any): Promise<void>;
-declare function handleSearch(): void;
-declare function showDetailPage(uri: string, type: string): void;
-declare function getStoredCurrentTrack(): any;
-
-declare var zoekInstelling: string;
-
 // Greeting functie: bepaald adhv tijd wat de begroeting is
 const greetingEl = document.getElementById("greeting");
 
-function setGreeting(name: string = "gebruiker"): void {
+function setGreeting(name = "gebruiker") {
   if (!greetingEl) return;
   const hour = new Date().getHours();
-  let greeting: string;
+  let greeting;
   if (hour >= 6 && hour < 12) {
     greeting = "Goedemorgen";
   } else if (hour < 18) {
@@ -34,7 +19,7 @@ function setGreeting(name: string = "gebruiker"): void {
   }
 }
 // naam ophalen van spotify
-(async function initGreeting(): Promise<void> {
+(async function initGreeting() {
   if (typeof spIsLoggedIn === "function" && spIsLoggedIn()) {
     try {
       const me = await spotifyGetMe();
@@ -49,17 +34,32 @@ function setGreeting(name: string = "gebruiker"): void {
   setGreeting();
 })();
 // Mood selector
-const moods = document.querySelectorAll(".mood-chip");
-const sidebarMood = document.getElementById("sidebar-mood");
-for (let i = 0; i < moods.length; i++) {
-  moods[i].addEventListener("click", function (this: HTMLElement) {
-    for (let j = 0; j < moods.length; j++) {
-      moods[j].classList.remove("selected");
-    }
-    this.classList.add("selected");
-    if (sidebarMood) {
-      sidebarMood.textContent = this.dataset.mood || "";
-    }
+document.querySelectorAll(".mood-chip").forEach((chip, idx) => {
+  chip.addEventListener("click", () => {
+    document
+      .querySelectorAll(".mood-chip")
+      .forEach((c) => c.classList.remove("selected"));
+    chip.classList.add("selected");
+    
+    const mood = chip.dataset.mood;
+    if (typeof window.updateHeaderMood === "function") window.updateHeaderMood(mood);
+    saveUserMood(mood);
+    
+    const colors = ["#7c5cfc", "#ff6b6b", "#4ecdc4", "#ffe66d", "#ff9ff3"];
+    document.documentElement.style.setProperty("--accent", colors[idx % colors.length]);
+  });
+});
+
+window.updateHeaderMood = function(mood) {
+  const textEl = document.getElementById("current-mood-text");
+  if (textEl) textEl.textContent = mood;
+}
+
+async function saveUserMood(mood) {
+  await fetch('/api/user/mood', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ mood })
   });
 }
 // navigatie
@@ -83,19 +83,41 @@ document
   ?.addEventListener("click", () => showPage("likes"));
 // nieuwe playlist
 document.getElementById("nav-new-playlist")?.addEventListener("click", () => {
-  const name = prompt("Naam van je nieuwe playlist:");
-  if (name && name.trim()) {
-    const rawData = localStorage.getItem("spotify_custom_playlists");
-    const playlists = JSON.parse(rawData || "{}");
-    if (playlists[name]) {
-      alert("Deze playlist bestaat al!");
-      return;
-    }
-    playlists[name] = [];
-    localStorage.setItem("spotify_custom_playlists", JSON.stringify(playlists));
-    renderCustomPlaylists();
-    showPage("playlist", name);
+  if (typeof spIsLoggedIn === "function" && !spIsLoggedIn()) {
+    showCustomModal({
+      title: "Inloggen vereist",
+      message: "Je moet ingelogd zijn bij Spotify om playlists te maken die bewaard blijven.",
+      confirmText: "Login",
+      onConfirm: () => {
+        if (typeof spotifyLogin === "function") spotifyLogin();
+      }
+    });
+    return;
   }
+
+  showCustomModal({
+    title: "Nieuwe playlist",
+    message: "Geef een naam op voor je nieuwe afspeellijst.",
+    showInput: true,
+    placeholder: "Bv. og katy perry on top",
+    onConfirm: async (name) => {
+      if (name && name.trim()) {
+        const playlists = window.getStoredPlaylists();
+        if (playlists.some(p => p.name === name)) {
+          showCustomModal({
+            title: "Oeps!",
+            message: "Deze playlist bestaat al!",
+          });
+          return;
+        }
+        const created = await window.createBackendPlaylist(name);
+        if (created) {
+           if (typeof window.renderCustomPlaylists === "function") window.renderCustomPlaylists();
+           showPage("playlist", name);
+        }
+      }
+    },
+  });
 });
 // playlist verwijderen
 document
@@ -103,68 +125,44 @@ document
   ?.addEventListener("click", () => {
     const titleEl = document.getElementById("playlist-title");
     const name = titleEl ? titleEl.textContent : "";
-    if (name && 
-      confirm(
-        "Weet je zeker dat je de playlist '" + name + "' wilt verwijderen?",
-      )
-    ) {
-      const rawData = localStorage.getItem("spotify_custom_playlists");
-      const playlists = JSON.parse(rawData || "{}");
-      delete playlists[name];
-      localStorage.setItem(
-        "spotify_custom_playlists",
-        JSON.stringify(playlists),
-      );
-      renderCustomPlaylists();
-      showPage("home");
-    }
+    showCustomModal({
+      title: "Playlist verwijderen",
+      message: `Weet je zeker dat je de playlist '${name}' wilt verwijderen?`,
+      confirmText: "Verwijderen",
+      isDanger: true,
+      onConfirm: async () => {
+        const playlists = window.getStoredPlaylists();
+        const pl = playlists.find((p) => p.name === name);
+        if (pl) {
+          await window.deleteBackendPlaylist(pl._id);
+        }
+        showPage("home");
+      },
+    });
   });
 
-function toggleGlobalLike(uri: string, meta: any): boolean {
-  if (!uri) return false;
-  const targetId = getTrackId(uri);
-  let likes = getLikes();
-  let foundIndex = -1;
-  for (let i = 0; i < likes.length; i++) {
-    if (getTrackId(likes[i].uri) === targetId) {
-      foundIndex = i;
-      break;
-    }
-  }
-  const isNowLiked = foundIndex === -1;
-  if (foundIndex !== -1) {
-    likes.splice(foundIndex, 1);
-  } else {
-    likes.unshift({
-      uri,
-      meta,
-    });
-  }
-  setLikes(likes);
-  syncGlobalLikeUI(uri, isNowLiked);
-  return isNowLiked;
-}
 // afspelen
 document.getElementById("play-likes-btn")?.addEventListener("click", () => {
   const likes = getLikes();
   if (likes.length === 0) return;
-  const uris = likes.map((l: any) => l.uri);
+  const uris = [];
+  for (let i = 0; i < likes.length; i++) uris.push(likes[i].uri);
   playSong(uris, likes[0].meta);
 });
 document.getElementById("play-playlist-btn")?.addEventListener("click", () => {
-  const titleEl = document.getElementById("playlist-title");
-  const name = titleEl ? titleEl.textContent : "";
-  if (!name) return;
-  const rawData = localStorage.getItem("spotify_custom_playlists");
-  const playlists = JSON.parse(rawData || "{}");
-  const tracks = playlists[name] || [];
-  if (tracks.length === 0) return;
-  const uris = tracks.map((t: any) => t.uri);
-  playSong(uris, tracks[0].meta);
+    const titleEl = document.getElementById("playlist-title");
+    const name = titleEl ? titleEl.textContent : "";
+    const playlists = window.getStoredPlaylists();
+    const pl = playlists.find(p => p.name === name);
+    const tracks = pl ? pl.tracks : [];
+    if (tracks.length === 0) return;
+    const uris = tracks.map(t => t.uri);
+    playSong(uris, tracks[0].meta);
 });
+
 // zoek acties
 const zoekKnop = document.getElementById("zoekKnop");
-const zoekVeld = document.getElementById("zoekVeld") as HTMLInputElement;
+const zoekVeld = document.getElementById("zoekVeld");
 zoekKnop?.addEventListener("click", handleSearch);
 zoekVeld?.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
@@ -176,30 +174,29 @@ const filterAlles = document.getElementById("alles");
 const filterArtiesten = document.getElementById("artiesten");
 const filterNummer = document.getElementById("nummer");
 
-function updateFilterUI(activeBtn: HTMLElement | null): void {
+function updateFilterUI(activeBtn) {
   const filters = [filterAlles, filterArtiesten, filterNummer];
   for (let i = 0; i < filters.length; i++) {
-    if (filters[i]) filters[i]!.classList.remove("selected");
+    if (filters[i]) filters[i].classList.remove("selected");
   }
   if (activeBtn) activeBtn.classList.add("selected");
 }
 filterAlles?.addEventListener("click", () => {
   zoekInstelling = "artist,track";
   updateFilterUI(filterAlles);
+  if (zoekVeld?.value.trim()) handleSearch();
 });
 filterArtiesten?.addEventListener("click", () => {
   zoekInstelling = "artist";
   updateFilterUI(filterArtiesten);
+  if (zoekVeld?.value.trim()) handleSearch();
 });
 filterNummer?.addEventListener("click", () => {
   zoekInstelling = "track";
   updateFilterUI(filterNummer);
+  if (zoekVeld?.value.trim()) handleSearch();
 });
-
-if (typeof renderCustomPlaylists === "function") {
-    renderCustomPlaylists();
-}
-
+if (typeof window.renderCustomPlaylists === "function") window.renderCustomPlaylists();
 // details vanuit player
 document.getElementById("now-art")?.addEventListener("click", () => {
   const current = getStoredCurrentTrack();

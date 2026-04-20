@@ -109,6 +109,18 @@
   background: rgba(255,255,255,0.05);
 }
 
+.follow-btn.following {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(124, 92, 252, 0.1);
+}
+
+.detail-like-btn.liked {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(124, 92, 252, 0.1);
+}
+
 .detail-content {
   padding: 32px;
   background-image: linear-gradient(rgba(255,255,255,0.05), transparent);

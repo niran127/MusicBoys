@@ -62,30 +62,6 @@ nav {
   opacity: 1;
 }
 
-.mood-badge {
-  margin-top: auto;
-  background: linear-gradient(
-    135deg,
-    rgba(124, 92, 252, 0.2),
-    rgba(200, 109, 215, 0.15)
-  );
-  border: 1px solid rgba(124, 92, 252, 0.3);
-  border-radius: var(--radius);
-  padding: 14px;
-}
-
-.mood-badge-label {
-  font-size: 0.72rem;
-  color: var(--muted);
-  margin-bottom: 4px;
-}
-
-.mood-badge-value {
-  font-family: "Syne", sans-serif;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--accent2);
-}
 
 #custom-playlists-list {
   margin-top: 8px;

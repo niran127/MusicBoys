@@ -1,29 +1,14 @@
-declare function getTrackId(uri: string): string;
-declare function updateLikesPage(): void;
-declare function showPlaylist(name: string): void;
-declare function initGame(): void;
-declare function spotifyGetArtist(id: string): Promise<any>;
-declare function spotifyGetArtistTopTracks(id: string): Promise<any>;
-declare function spotifyGetArtistAlbums(id: string): Promise<any>;
-declare function spotifyGetTrack(id: string): Promise<any>;
-declare function getLikes(): any[];
-declare function renderTrackRow(img: string, name: string, album: string, type: string, uri: string, isLiked: boolean, artistUri?: string, artistName?: string): string;
-declare function attachRowListeners(container: HTMLElement | null): void;
-declare function playSong(uris: string | string[], meta: any): Promise<void>;
-declare function toggleGlobalLike(uri: string, meta: any): boolean;
+let currentPage = "home";
 
-let currentPage: string = "home";
-
-function showPage(page: string, playlistName: string | null = null): void {
-  const pageHome = document.getElementById("page-home") as HTMLElement;
-  const pageZoeken = document.getElementById("page-zoeken") as HTMLElement;
+window.showPage = function(page, playlistName = null) {
+  const pageHome = document.getElementById("page-home");
+  const pageZoeken = document.getElementById("page-zoeken");
   const pageLikes = document.getElementById("page-likes");
   const pagePlaylist = document.getElementById("page-playlist");
   const pageDetail = document.getElementById("page-detail");
   const pageGame = document.getElementById("page-game");
-  
-  const navHome = document.getElementById("nav-home") as HTMLElement;
-  const navZoeken = document.getElementById("nav-zoeken") as HTMLElement;
+  const navHome = document.getElementById("nav-home");
+  const navZoeken = document.getElementById("nav-zoeken");
   const navLikes = document.getElementById("nav-likes");
   const navGame = document.getElementById("nav-game");
 
@@ -31,15 +16,15 @@ function showPage(page: string, playlistName: string | null = null): void {
     currentPage = page;
   }
 
-  if (pageHome) pageHome.style.display = "none";
-  if (pageZoeken) pageZoeken.style.display = "none";
+  pageHome.style.display = "none";
+  pageZoeken.style.display = "none";
   if (pageLikes) pageLikes.style.display = "none";
   if (pagePlaylist) pagePlaylist.style.display = "none";
   if (pageDetail) pageDetail.style.display = "none";
   if (pageGame) pageGame.style.display = "none";
 
-  if (navHome) navHome.classList.remove("active");
-  if (navZoeken) navZoeken.classList.remove("active");
+  navHome.classList.remove("active");
+  navZoeken.classList.remove("active");
   if (navLikes) navLikes.classList.remove("active");
   if (navGame) navGame.classList.remove("active");
 
@@ -50,11 +35,11 @@ function showPage(page: string, playlistName: string | null = null): void {
     });
 
   if (page === "home") {
-    if (pageHome) pageHome.style.display = "flex";
-    if (navHome) navHome.classList.add("active");
+    pageHome.style.display = "flex";
+    navHome.classList.add("active");
   } else if (page === "zoeken") {
-    if (pageZoeken) pageZoeken.style.display = "flex";
-    if (navZoeken) navZoeken.classList.add("active");
+    pageZoeken.style.display = "flex";
+    navZoeken.classList.add("active");
   } else if (page === "likes") {
     if (pageLikes) {
       pageLikes.style.display = "flex";
@@ -78,19 +63,15 @@ function showPage(page: string, playlistName: string | null = null): void {
 }
 
 // detailpagina
-async function showDetailPage(uri: string, typeInput?: string): Promise<void> {
+window.showDetailPage = async function(uri, typeInput) {
   if (!uri) return;
   const pageDetail = document.getElementById("page-detail");
-  if (!pageDetail) return;
-
   const id = getTrackId(uri);
   let type = typeInput;
   if (uri.includes(":artist:")) type = "artist";
   else if (uri.includes(":track:")) type = "track";
-  
   showPage("detail");
   pageDetail.innerHTML = `<div class="empty-state">laden...</div>`;
-  
   if (type === "artist") {
     await showArtistDetail(id);
   } else {
@@ -99,10 +80,8 @@ async function showDetailPage(uri: string, typeInput?: string): Promise<void> {
 }
 
 // artiest detailpagina
-async function showArtistDetail(id: string): Promise<void> {
+window.showArtistDetail = async function(id) {
   const pageDetail = document.getElementById("page-detail");
-  if (!pageDetail) return;
-
   try {
     const [info, tracks, albums] = await Promise.all([
       spotifyGetArtist(id),
@@ -110,11 +89,13 @@ async function showArtistDetail(id: string): Promise<void> {
       spotifyGetArtistAlbums(id),
     ]);
     const likes = getLikes();
-    const checkLiked = (uri: string) =>
+    const checkLiked = (uri) =>
       likes.some((l) => getTrackId(l.uri) === getTrackId(uri));
-      
     const img = info.images?.[0]?.url || "";
     const genres = info.genres?.join(", ") || "geen genres";
+    const isFollowing = typeof getFollowedArtists === "function"
+      ? getFollowedArtists().some(a => a.id === id)
+      : false;
     
     pageDetail.innerHTML = `
       <div class="detail-header artist-header" style="background: linear-gradient(135deg, #333, var(--bg))">
@@ -131,7 +112,7 @@ async function showArtistDetail(id: string): Promise<void> {
             </div>
             <div class="detail-actions">
               <button class="play-main-btn">AFSPELEN</button>
-              <button class="follow-btn">VOLGEN</button>
+              <button class="follow-btn ${isFollowing ? 'following' : ''}" data-artist-id="${id}">${isFollowing ? 'Volgend' : 'Volgen'}</button>
             </div>
           </div>
         </div>
@@ -144,7 +125,7 @@ async function showArtistDetail(id: string): Promise<void> {
               tracks?.tracks
                 ? tracks.tracks
                     .slice(0, 5)
-                    .map((t: any) => {
+                    .map((t) => {
                       const albumImg = t.album?.images?.[0]?.url || "";
                       return renderTrackRow(
                         albumImg,
@@ -169,7 +150,7 @@ async function showArtistDetail(id: string): Promise<void> {
               albums?.items
                 ? albums.items
                     .map(
-                      (a: any) => `
+                      (a) => `
               <div class="album-card" data-uri="${a.uri}">
                 <div class="album-art-wrap">
                   <img src="${a.images?.[0]?.url || ""}" alt="${a.name}">
@@ -195,22 +176,38 @@ async function showArtistDetail(id: string): Promise<void> {
         </section>
       </div>
     `;
+
     attachRowListeners(document.getElementById("artist-top-tracks"));
-    pageDetail
-      .querySelector(".play-main-btn")
-      ?.addEventListener("click", () => {
-        const uris = tracks.tracks.map((t: any) => t.uri);
+    
+    pageDetail.querySelector(".play-main-btn")?.addEventListener("click", () => {
+        const uris = tracks.tracks.map((t) => t.uri);
         playSong(uris, {
           name: info.name,
           artist: "top tracks",
           image: img,
         });
-      });
-    pageDetail
-      .querySelector(".detail-close-btn")
-      ?.addEventListener("click", () => {
+    });
+
+    pageDetail.querySelector(".detail-close-btn")?.addEventListener("click", () => {
         showPage(currentPage);
-      });
+    });
+
+    const followBtn = pageDetail.querySelector(".follow-btn");
+    followBtn?.addEventListener("click", async () => {
+        const artistData = { name: info.name, image: img, uri: info.uri };
+        const nowFollowing = await toggleGlobalFollow(id, artistData);
+        followBtn.textContent = nowFollowing ? 'GEVOLGD \u2713' : 'VOLGEN';
+        followBtn.classList.toggle('following', nowFollowing);
+    });
+
+    pageDetail.querySelectorAll(".album-card").forEach(card => {
+        card.addEventListener("click", () => {
+            const uri = card.dataset.uri;
+            // Je zou hier een album detail kunnen doen, of gewoon afspelen
+            playSong(uri, { name: card.querySelector(".album-name").textContent, artist: info.name, image: card.querySelector("img").src });
+        });
+    });
+
   } catch (err) {
     console.error(err);
     pageDetail.innerHTML = `<div class="empty-state">foutje bij laden.</div>`;
@@ -218,10 +215,8 @@ async function showArtistDetail(id: string): Promise<void> {
 }
 
 // nummer detailpagina
-async function showTrackDetail(id: string): Promise<void> {
+window.showTrackDetail = async function(id) {
   const pageDetail = document.getElementById("page-detail");
-  if (!pageDetail) return;
-
   try {
     const track = await spotifyGetTrack(id);
     const img = track.album?.images?.[0]?.url || "";
@@ -241,6 +236,7 @@ async function showTrackDetail(id: string): Promise<void> {
     const isLiked = likes.some(
       (l) => getTrackId(l.uri) === getTrackId(track.uri),
     );
+
     pageDetail.innerHTML = `
       <div class="detail-header track-header" style="background: linear-gradient(135deg, var(--accent), var(--bg))">
         <button class="detail-close-btn" title="sluiten">&times;</button>
@@ -250,7 +246,7 @@ async function showTrackDetail(id: string): Promise<void> {
             <span class="detail-badge">nummer</span>
             <h1 class="detail-title">${track.name}</h1>
             <div class="detail-meta">
-              <span class="track-artist-link" data-uri="${track.artists[0].uri}" style="font-weight: 700; cursor: pointer;">${track.artists.map((a: any) => a.name).join(", ")}</span>
+              <span class="track-artist-link" data-uri="${track.artists[0].uri}" style="font-weight: 700; cursor: pointer;">${track.artists.map((a) => a.name).join(", ")}</span>
               <span>·</span>
               <span>${track.album.name}</span>
               <span>·</span>
@@ -275,39 +271,36 @@ async function showTrackDetail(id: string): Promise<void> {
         </section>
       </div>
     `;
-    pageDetail
-      .querySelector(".play-main-btn")
-      ?.addEventListener("click", () => {
+
+    pageDetail.querySelector(".play-main-btn")?.addEventListener("click", () => {
         playSong(track.uri, {
           name: track.name,
           artist: track.artists[0].name,
           artistUri: track.artists[0].uri,
           image: img,
         });
-      });
-    pageDetail
-      .querySelector(".detail-like-btn")
-      ?.addEventListener("click", () => {
+    });
+
+    pageDetail.querySelector(".detail-like-btn")?.addEventListener("click", () => {
         toggleGlobalLike(track.uri, {
           name: track.name,
-          artist: track.artists.map((a: any) => a.name).join(", "),
+          artist: track.artists.map((a) => a.name).join(", "),
           artistUri: track.artists[0].uri,
           image: img,
         });
-      });
-    pageDetail
-      .querySelector(".track-artist-link")
-      ?.addEventListener("click", (e: any) => {
-        const target = e.target.closest(".track-artist-link");
-        if (target) {
-            showDetailPage(target.dataset.uri, "artist");
-        }
-      });
-    pageDetail
-      .querySelector(".detail-close-btn")
-      ?.addEventListener("click", () => {
+    });
+
+    pageDetail.querySelector(".track-artist-link")?.addEventListener("click", (e) => {
+        showDetailPage(
+          e.target.closest(".track-artist-link").dataset.uri,
+          "artist",
+        );
+    });
+
+    pageDetail.querySelector(".detail-close-btn")?.addEventListener("click", () => {
         showPage(currentPage);
-      });
+    });
+
   } catch (err) {
     console.error(err);
     pageDetail.innerHTML = `<div class="empty-state">kon nummer niet laden.</div>`;

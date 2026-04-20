@@ -1,30 +1,24 @@
-declare function showPage(page: string, data?: any): void;
-declare function renderTrackRow(img: string, name: string, artist: string, type: string, uri: string, isLiked: boolean, artistUri?: string): string;
-declare function attachRowListeners(container: HTMLElement | null): void;
-declare function getTrackId(uri: string): string;
-
-function renderCustomPlaylists(): void {
+window.renderCustomPlaylists = function() {
   const customPlaylistsList = document.getElementById("custom-playlists-list");
   if (!customPlaylistsList) return;
-  const rawData = localStorage.getItem("spotify_custom_playlists");
-  const playlists = JSON.parse(rawData || "{}");
+  const playlists = window.getStoredPlaylists();
+
   let html = "";
-  const names = Object.keys(playlists);
-  for (let i = 0; i < names.length; i++) {
-    const name = names[i];
+  for (let i = 0; i < playlists.length; i++) {
+    const pl = playlists[i];
     html += `
-      <div class="nav-item" data-name="${name}">
+      <div class="nav-item" data-name="${pl.name}" data-id="${pl._id}">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
           <path d="M9 18V5l12-2v13"></path>
           <circle cx="6" cy="18" r="3"></circle>
           <circle cx="18" cy="16" r="3"></circle>
         </svg>
-        ${name}
+        ${pl.name}
       </div>
     `;
   }
   customPlaylistsList.innerHTML = html;
-  const items = customPlaylistsList.querySelectorAll(".nav-item") as NodeListOf<HTMLElement>;
+  const items = customPlaylistsList.querySelectorAll(".nav-item");
   items.forEach((item) => {
     item.addEventListener("click", () => {
       if (typeof showPage === "function") {
@@ -33,29 +27,31 @@ function renderCustomPlaylists(): void {
     });
   });
 }
-
 // playlist inhoud tonen
-function showPlaylist(name: string): void {
+function showPlaylist(name) {
   const titleEl = document.getElementById("playlist-title");
   const resultsEl = document.getElementById("playlist-resultaten");
   if (!titleEl || !resultsEl) return;
-  const rawData = localStorage.getItem("spotify_custom_playlists");
-  const playlists = JSON.parse(rawData || "{}");
-  const tracks = playlists[name] || [];
+  const playlists = window.getStoredPlaylists();
+  const playlist = playlists.find(p => p.name === name);
+  const tracks = playlist ? playlist.tracks : [];
+
   titleEl.textContent = name;
   if (tracks.length === 0) {
     resultsEl.innerHTML = `<div class="empty-state">deze lijst is leeg.</div>`;
   } else {
+    const likes = typeof getLikes === "function" ? getLikes() : [];
     let html = "";
     for (let i = 0; i < tracks.length; i++) {
       const item = tracks[i];
+      const isLiked = likes.some(l => l.uri === item.uri);
       html += renderTrackRow(
         item.meta.image,
         item.meta.name,
         item.meta.artist,
         "Nummer",
         item.uri,
-        true,
+        isLiked,
         item.meta.artistUri,
       );
     }
@@ -66,37 +62,33 @@ function showPlaylist(name: string): void {
   document
     .querySelectorAll("#custom-playlists-list .nav-item")
     .forEach((item) => {
-      const hItem = item as HTMLElement;
-      if (hItem.dataset.name === name) {
-        hItem.classList.add("active");
+      if (item.dataset.name === name) {
+        item.classList.add("active");
       } else {
-        hItem.classList.remove("active");
+        item.classList.remove("active");
       }
     });
 }
-
 // menu tonen om toe te voegen
-function showPlaylistMenu(e: MouseEvent, trackData: any): void {
+function showPlaylistMenu(e, trackData) {
   const oldMenus = document.querySelectorAll(".playlist-menu");
   oldMenus.forEach((m) => m.remove());
-  const rawData = localStorage.getItem("spotify_custom_playlists");
-  const playlists = JSON.parse(rawData || "{}");
-  const playlistNames = Object.keys(playlists);
+  const playlists = window.getStoredPlaylists();
   const activePage = document.getElementById("page-playlist");
   const playlistTitleEl = document.getElementById("playlist-title");
   const currentPlaylistName = playlistTitleEl
-    ? playlistTitleEl.textContent || ""
+    ? playlistTitleEl.textContent
     : "";
   const isOnCurrentPlaylist = activePage && activePage.style.display !== "none";
   const menu = document.createElement("div");
   menu.className = "playlist-menu";
   let menuHtml = `<div class="playlist-menu-header">toevoegen aan:</div>`;
-  if (playlistNames.length === 0) {
+  if (playlists.length === 0) {
     menuHtml += `<div class="playlist-menu-item disabled" style="opacity: 0.5; padding: 8px 12px;">geen playlists</div>`;
   } else {
-    for (let i = 0; i < playlistNames.length; i++) {
-      const name = playlistNames[i];
-      menuHtml += `<div class="playlist-menu-item add" data-name="${name}">${name}</div>`;
+    for (let i = 0; i < playlists.length; i++) {
+        const pl = playlists[i];
+        menuHtml += `<div class="playlist-menu-item add" data-name="${pl.name}">${pl.name}</div>`;
     }
   }
   // vw optie
@@ -109,10 +101,10 @@ function showPlaylistMenu(e: MouseEvent, trackData: any): void {
   document.body.appendChild(menu);
   menu.style.left = e.clientX - 170 + "px";
   menu.style.top = e.clientY + "px";
-  const addItems = menu.querySelectorAll(".playlist-menu-item.add") as NodeListOf<HTMLElement>;
+  const addItems = menu.querySelectorAll(".playlist-menu-item.add");
   addItems.forEach((item) => {
     item.addEventListener("click", () => {
-      addTrackToPlaylist(item.dataset.name || "", trackData);
+      addTrackToPlaylist(item.dataset.name, trackData);
       menu.remove();
     });
   });
@@ -124,34 +116,37 @@ function showPlaylistMenu(e: MouseEvent, trackData: any): void {
     });
   }
   setTimeout(() => {
-    const handleOutsideClick = (): void => {
-        menu.remove();
-    };
-    window.addEventListener("click", handleOutsideClick, {
+    window.addEventListener("click", () => menu.remove(), {
       once: true,
     });
   }, 10);
 }
-
-function addTrackToPlaylist(playlistName: string, trackData: any): void {
-  const rawData = localStorage.getItem("spotify_custom_playlists");
-  const playlists = JSON.parse(rawData || "{}");
-  if (!playlists[playlistName]) return;
-  let exists = false;
-  for (let i = 0; i < playlists[playlistName].length; i++) {
-    if (
-      getTrackId(playlists[playlistName][i].uri) === getTrackId(trackData.uri)
-    ) {
-      exists = true;
-      break;
-    }
-  }
-  if (exists) {
-    alert("staat er al in!");
+async function addTrackToPlaylist(playlistName, trackData) {
+  const playlists = window.getStoredPlaylists();
+  const pl = playlists.find(p => p.name === playlistName);
+  if (!pl) return;
+  
+  const targetId = getTrackId(trackData.uri);
+  if (pl.tracks.some(t => getTrackId(t.uri) === targetId)) {
+    showCustomModal({
+      title: "Information",
+      message: "This track is already in the playlist!",
+    });
     return;
   }
-  playlists[playlistName].push(trackData);
-  localStorage.setItem("spotify_custom_playlists", JSON.stringify(playlists));
+  
+  // Update cache
+  pl.tracks.push(trackData);
+  
+  // Sync with backend
+  await window.addTrackToBackendPlaylist(pl._id, {
+    id: targetId,
+    name: trackData.meta.name,
+    artist: trackData.meta.artist,
+    image: trackData.meta.image,
+    uri: trackData.uri
+  });
+  
   const activePage = document.getElementById("page-playlist");
   const titleEl = document.getElementById("playlist-title");
   if (
@@ -164,18 +159,16 @@ function addTrackToPlaylist(playlistName: string, trackData: any): void {
   }
 }
 
-function removeTrackFromPlaylist(playlistName: string, trackUri: string): void {
-  const rawData = localStorage.getItem("spotify_custom_playlists");
-  const playlists = JSON.parse(rawData || "{}");
-  if (!playlists[playlistName]) return;
+async function removeTrackFromPlaylist(playlistName, trackUri) {
+  const playlists = window.getStoredPlaylists();
+  const pl = playlists.find(p => p.name === playlistName);
+  if (!pl) return;
+  
   const targetId = getTrackId(trackUri);
-  const newTracks = [];
-  for (let i = 0; i < playlists[playlistName].length; i++) {
-    if (getTrackId(playlists[playlistName][i].uri) !== targetId) {
-      newTracks.push(playlists[playlistName][i]);
-    }
-  }
-  playlists[playlistName] = newTracks;
-  localStorage.setItem("spotify_custom_playlists", JSON.stringify(playlists));
+  pl.tracks = pl.tracks.filter(t => getTrackId(t.uri) !== targetId);
+  
+  // Sync with backend
+  await window.removeTrackFromBackendPlaylist(pl._id, targetId);
+  
   showPlaylist(playlistName);
 }

@@ -11,12 +11,12 @@ function renderTrackRow(
   const eName = name.replace(/"/g, "&quot;");
   const eSub = subtitle.replace(/"/g, "&quot;");
   const eArtistMeta = (artistNameMetadata || subtitle).replace(/"/g, "&quot;");
-  const isTrack = type === "Nummer";
+  const isTrack = !!trackUri; // Elke rij met een trackUri is een nummer
   // data voor later gebruik
-  const data =
-    trackUri && isTrack
-      ? `data-uri="${trackUri}" data-name="${eName}" data-artist="${eArtistMeta}" data-image="${imageUrl || ""}" data-type="${type}" ${artistUri ? `data-artist-uri="${artistUri}"` : ""}`
-      : `data-type="${type}" ${artistUri ? `data-artist-uri="${artistUri}"` : ""}`;
+  let data = `data-type="${type}" ${artistUri ? `data-artist-uri="${artistUri}"` : ""}`;
+  if (trackUri) {
+      data += ` data-uri="${trackUri}" data-name="${eName}" data-artist="${eArtistMeta}" data-image="${imageUrl || ""}"`;
+  }
   const playIcon =
     isTrack && trackUri
       ? `
@@ -57,7 +57,7 @@ function renderTrackRow(
   `;
 }
 // likes syncen
-function syncGlobalLikeUI(uri, isLiked) {
+window.syncGlobalLikeUI = function(uri, isLiked) {
   if (typeof getTrackId !== "function") return;
   const targetId = getTrackId(uri);
   // rij aanpassen
@@ -89,61 +89,80 @@ function syncGlobalLikeUI(uri, isLiked) {
   }
 }
 // gelikete nummers tonen
-function updateLikesPage() {
+window.updateLikesPage = function() {
   const container = document.getElementById("likes-resultaten");
   if (!container) return;
+  
   let likes = getLikes();
-  // dubbelchecken
-  const uniqueLikes = [];
-  const seenIds = new Set();
-  for (let i = 0; i < likes.length; i++) {
-    const item = likes[i];
-    const id = getTrackId(item.uri);
-    if (!seenIds.has(id)) {
-      seenIds.add(id);
-      uniqueLikes.push(item);
-    }
+  
+  // default recent sort
+  likes.sort((a, b) => new Date(b.dateAdded || 0) - new Date(a.dateAdded || 0));
+
+  // Expanded Filter to check both artist and track name
+  const filterText = document.getElementById("likes-artist-filter")?.value?.toLowerCase() || "";
+  if (filterText) {
+    likes = likes.filter(l => 
+      l.meta.artist.toLowerCase().includes(filterText) || 
+      l.meta.name.toLowerCase().includes(filterText)
+    );
   }
-  if (uniqueLikes.length !== likes.length) {
-    likes = uniqueLikes;
-    setLikes(likes);
-  }
+
   if (likes.length === 0) {
-    container.innerHTML = `<div class="empty-state">je hebt nog niks geliket.</div>`;
+    container.innerHTML = `<div class="empty-state">Geen resultaten gevonden.</div>`;
     return;
   }
+
   let rowsHtml = "";
   for (let i = 0; i < likes.length; i++) {
     const item = likes[i];
+    const dateStr = item.dateAdded ? new Date(item.dateAdded).toLocaleDateString('nl-NL') : "Nummer";
+
     rowsHtml += renderTrackRow(
       item.meta.image,
       item.meta.name,
       item.meta.artist,
-      "Nummer",
+      dateStr,
       item.uri,
       true,
-      item.meta.artistUri,
+      item.meta.artistUri
     );
   }
   container.innerHTML = rowsHtml;
   attachRowListeners(container);
-}
+};
+
+// Event listeners for controls
+document.getElementById("likes-artist-filter")?.addEventListener("input", () => window.updateLikesPage());
+
+window.showToast = function(message) {
+  let toast = document.querySelector('.toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.className = 'toast';
+    document.body.appendChild(toast);
+  }
+  
+  toast.textContent = message;
+  toast.classList.add('visible');
+  
+  setTimeout(() => {
+    toast.classList.remove('visible');
+  }, 3000);
+};
 
 function attachRowListeners(container) {
   // likes instellen
   const likeBtns = container.querySelectorAll(".track-like-btn");
   likeBtns.forEach((btn) => {
-    btn.addEventListener("click", (e) => {
+    btn.addEventListener("click", async (e) => {
       e.stopPropagation();
       const row = btn.closest(".track-row");
-      const isNowLiked = toggleGlobalLike(row.dataset.uri, {
+      await window.toggleGlobalLike(row.dataset.uri, {
         name: row.dataset.name,
         artist: row.dataset.artist,
         artistUri: row.dataset.artistUri,
         image: row.dataset.image,
       });
-      if (isNowLiked) btn.classList.add("liked");
-      else btn.classList.remove("liked");
     });
   });
   // playlist menu
@@ -192,21 +211,26 @@ function attachRowListeners(container) {
       ) {
         return;
       }
-      if (type === "Nummer" && uri) {
+      const typeLabel = row.dataset.type;
+      if (uri && (typeLabel === "Nummer" || row.querySelector('.track-like-btn'))) {
         const allRows = Array.from(
-          container.querySelectorAll(".track-row[data-type='Nummer']"),
+          container.querySelectorAll(".track-row[data-uri]")
         );
-        const startIndex = allRows.indexOf(row);
-        const queueUris = [];
-        if (startIndex !== -1) {
-          for (let i = startIndex; i < allRows.length; i++) {
-            if (allRows[i].dataset.uri) queueUris.push(allRows[i].dataset.uri);
-          }
-        } else {
-          queueUris.push(uri);
-        }
+        
+        // Build global queue with metadata for Prev/Next sync
+        window.playbackQueue = allRows.map(r => ({
+           uri: r.dataset.uri,
+           meta: {
+               name: r.dataset.name,
+               artist: r.dataset.artist,
+               image: r.dataset.image,
+               artistUri: r.dataset.artistUri
+           }
+        }));
+        window.currentQueueIndex = window.playbackQueue.findIndex(item => item.uri === uri);
+
         if (typeof playSong === "function") {
-          playSong(queueUris, {
+          playSong(uri, {
             name: row.dataset.name,
             artist: row.dataset.artist,
             artistUri: row.dataset.artistUri,
@@ -215,7 +239,7 @@ function attachRowListeners(container) {
         }
         return;
       }
-      if (type === "Artiest") {
+      if (typeLabel === "Artiest") {
         if (typeof showDetailPage === "function") {
           showDetailPage(row.dataset.artistUri || uri, "artist");
         }
@@ -249,7 +273,7 @@ function showCustomModal({
     <div class="modal-content">
       <div class="modal-title">${title}</div>
       <div class="modal-message">${message}</div>
-      ${showInput ? `<input type="text" class="modal-input" placeholder="${placeholder}" id="modal-input-field">` : ""}
+      ${showInput ? `<input type="text" class="modal-input" placeholder="${placeholder}" id="modal-input-field" autocomplete="off">` : ""}
       <div class="modal-actions">
         ${onConfirm ? `<button class="modal-btn modal-btn-cancel" id="modal-cancel-btn">${cancelText}</button>` : ""}
         <button class="modal-btn ${isDanger ? "modal-btn-danger" : "modal-btn-confirm"}" id="modal-confirm-btn">${confirmText}</button>
@@ -296,3 +320,47 @@ function showCustomModal({
     if (e.target === overlay) closeModal();
   });
 }
+
+// User Dropdown Logica
+document.addEventListener("DOMContentLoaded", () => {
+    const userPill = document.getElementById("user-pill");
+    const userDropdown = document.getElementById("user-dropdown");
+    const logoutBtn = document.getElementById("logout-btn");
+
+    if (userPill && userDropdown) {
+        userPill.addEventListener("click", (e) => {
+            e.stopPropagation();
+            userDropdown.classList.toggle("active");
+        });
+
+        // Sluiten bij klikken buiten dropdown
+        window.addEventListener("click", () => {
+            userDropdown.classList.remove("active");
+        });
+    }
+
+    if (logoutBtn) {
+        const loggedIn = typeof spIsLoggedIn === "function" ? spIsLoggedIn() : false;
+        
+        if (!loggedIn) {
+            logoutBtn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.503 17.306c-.215.354-.675.467-1.03.249-2.862-1.748-6.465-2.144-10.707-1.177-.406.092-.817-.16-.909-.567-.092-.403.161-.815.567-.908 4.647-1.062 8.624-.616 11.83 1.341.355.213.467.675.249 1.03zm1.468-3.26c-.272.44-.847.579-1.287.308-3.277-2.013-8.274-2.598-12.151-1.421-.497.151-1.023-.129-1.173-.626-.15-.497.13-.1.023-.627 4.316-1.31 9.817-.655 13.593 1.666.44.271.58.845.308 1.287zm.126-3.41c-3.928-2.333-10.414-2.55-14.177-1.407-.604.183-1.246-.164-1.428-.767-.183-.604.164-1.246.767-1.428 4.321-1.312 11.487-1.059 16.002 1.62.544.323.72 1.033.398 1.577-.323.544-1.032.721-1.577.398z"/>
+                </svg>
+                <span>Login Spotify</span>
+            `;
+            logoutBtn.style.color = "var(--text)";
+        }
+
+        logoutBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (loggedIn) {
+                // Clear spotify locally and redirect to server logout
+                if (typeof spotifyLogout === "function") spotifyLogout(false);
+                window.location.href = '/logout';
+            } else {
+                if (typeof spotifyLogin === "function") spotifyLogin();
+            }
+        });
+    }
+});
