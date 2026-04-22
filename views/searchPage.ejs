@@ -32,11 +32,11 @@
                   </div>
                   
                </div>
-               <div class="filter-chips">
-                  <button class="filter-chip selected" id="alles">Alles</button>
-                  <button class="filter-chip" id="artiesten">Artiesten</button>
-                  <button class="filter-chip" id="nummer">Nummers</button>
-               </div>
+               <form class="filter-chips" action="http://localhost:1234/musicMatch/search/setting" method="POST">
+                  <button class="filter-chip <%= set === "track,artist" ? "selected":"" %>" id="alles" name="set" type="submit" value="track,artist">Alles</button>
+                  <button class="filter-chip <%= set === "artist" ? "selected":"" %>" id="artiesten" name="set" type="submit" value="artist">Artiesten</button>
+                  <button class="filter-chip <%= set === "track" ? "selected":"" %>" id="nummer" name="set" type="submit" value="track">Nummers</button>
+               </form>
             </section>
             <section>
                <div class="section-title">Resultaten</div>

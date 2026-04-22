@@ -1,5 +1,5 @@
 import express,{Router} from "express";
-import { getMood, searchHandler, setMood } from "../data";
+import { getMood, searchHandler, setMood,getSearchSetting,setsearchSetting } from "../data";
 import type{ Artists,Tracks } from "../types";
 
 export default function():Router{
@@ -11,18 +11,23 @@ export default function():Router{
 
     router.post("/",(req,res)=>{
         setMood(req.body.mood);
-        console.log(req.body.mood)
-        res.redirect("/")
+        res.redirect("/");
     })
 
     router.get("/search",async(req,res)=>{        
-        res.render("searchPage",{page:"search",data:0});
+        res.render("searchPage",{page:"search",data:0,set:getSearchSetting()});
     });
 
     router.post("/search",async(req,res)=>{
-        const data =  await searchHandler(req.body.zoekVeld,"track,artist");
-        res.render("searchPage",{page:"search",results:data})
+        const set = getSearchSetting();
+        const data =  await searchHandler(req.body.zoekVeld,set);
+        res.render("searchPage",{page:"search",results:data,set,})
     });
+
+    router.post("/search/setting",async(req,res)=>{
+        setsearchSetting(req.body.set);
+        res.redirect(`${req.baseUrl}/search`);
+    })
 
     router.get("/game",(req,res)=>{
         res.render("gamePage",{page:"game"});

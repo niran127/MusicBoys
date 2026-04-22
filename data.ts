@@ -4,6 +4,15 @@ const SP_CLIENT_ID = "7c5773b9dcc149b38a50f1d7d83c34a7";
 const SP_CLIENT_SECRET = "f9a584351aac45889f29e806274d73c4";
 
 let mood = "";
+let searchSetting = "track,artist";
+
+export function getSearchSetting(){
+    return searchSetting;
+}
+
+export function setsearchSetting(input:string){
+    searchSetting = input;
+}
 
 export function getMood(){
     return mood;
