@@ -3,6 +3,16 @@ import { Artists, Tracks } from "./types";
 const SP_CLIENT_ID = "7c5773b9dcc149b38a50f1d7d83c34a7";
 const SP_CLIENT_SECRET = "f9a584351aac45889f29e806274d73c4";
 
+let mood = "";
+
+export function getMood(){
+    return mood;
+}
+
+export function setMood(input:string){
+    mood = input;
+}
+
 // Dit object vervangt localStorage op de server
 let serverTokens: { at?: string; rt?: string; exp?: number } = {};
 

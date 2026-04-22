@@ -23,8 +23,8 @@
             <!-- mood -->
             <section>
                <div class="section-title">Kies je mood</div>
-               <div class="moods">
-                  <div class="mood-chip" data-mood="Chill">
+               <form class="moods" action="http://localhost:1234/musicMatch" method="POST">
+                  <button class="mood-chip <%= mood === "chill"? "selected":"" %>" data-mood="Chill" type="submit" name="mood" value="chill">
                      <svg
                         width="14"
                         height="14"
@@ -40,8 +40,8 @@
                         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                      </svg>
                      Chill
-                  </div>
-                  <div class="mood-chip" data-mood="Focus">
+                  </button>
+                  <button class="mood-chip <%= mood === "focus"? "selected":"" %>" data-mood="Focus" value="focus" name="mood" type="submit" >
                      <svg
                         width="14"
                         height="14"
@@ -55,8 +55,8 @@
                         <circle cx="12" cy="12" r="3" />
                      </svg>
                      Focus
-                  </div>
-                  <div class="mood-chip" data-mood="Party">
+                  </button>
+                  <button class="mood-chip <%= mood === "party"? "selected":"" %>" data-mood="Party" value="party" name="mood" type="submit">
                      <svg
                         width="14"
                         height="14"
@@ -71,8 +71,8 @@
                            />
                      </svg>
                      Party
-                  </div>
-                  <div class="mood-chip" data-mood="Sad">
+                  </button>
+                  <button class="mood-chip <%= mood === "sad" ? "selected":"" %>" data-mood="Sad" value="sad" name="mood" type="submit" ">
                      <svg
                         width="14"
                         height="14"
@@ -88,8 +88,8 @@
                         <line x1="15" y1="9" x2="15.01" y2="9" />
                      </svg>
                      Sad
-                  </div>
-                  <div class="mood-chip" data-mood="Workout">
+                  </button>
+                  <button class="mood-chip <%= mood === "workout" ? "selected":"" %>" data-mood="Workout" value="workout" name="mood" type="submit">
                      <svg
                         width="14"
                         height="14"
@@ -106,8 +106,8 @@
                         <line x1="14" y1="1" x2="14" y2="4" />
                      </svg>
                      Workout
-                  </div>
-               </div>
+                  </button>
+               </form>
             </section>
             <section>
                <div class="section-title">Snelle acties</div>
