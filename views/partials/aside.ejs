@@ -1,6 +1,6 @@
 <aside class="sidebar">
          <div class="logo">
-            <span class="logo-text">MusicBoys</span>
+            <span class="logo-text">MusicMatch</span>
          </div>
          <nav>
             <div class="nav-label">Menu</div>
@@ -71,7 +71,7 @@
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                </svg>
-               Nieuwe playlist
+               Nieuw
             </div>
             <div class="nav-item" id="nav-likes">
                <svg
@@ -86,13 +86,13 @@
                      d="M34,9c-4.2,0-7.9,2.1-10,5.4C21.9,11.1,18.2,9,14,9C7.4,9,2,14.4,2,21c0,11.9,22,24,22,24s22-12,22-24C46,14.4,40.6,9,34,9z"
                      />
                </svg>
-               Jouw likes
+               Likes
             </div>
             <div id="custom-playlists-list"></div>
          </nav>
          <div class="mood-badge">
-            <div class="mood-badge-label">Huidige mood</div>
-            <div class="mood-badge-value" id="sidebar-mood">Geen mood</div>
+            <div class="mood-badge-label">Mood</div>
+            <div class="mood-badge-value" id="sidebar-mood"><%= mood === "" ? "geen mood" : mood %></div>
          </div>
       </aside>
       <main>
