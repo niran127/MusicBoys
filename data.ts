@@ -216,3 +216,187 @@ export async function searchHandler(query:string,type:string){
       return allItems.slice(0,8);
       }
     }
+
+let currentTrack:any = null;
+let options:any = [];
+let previewAudio:any = null;
+let gameTimerInterval:any = null;
+let gameTimerValue = 0;
+let gameIsPlayingSnippet = false;
+let gameRoundActive = false;
+
+export function getCurrentTrack(){
+    return currentTrack;
+}
+
+function getAppVolume() {
+    const vol = localStorage.getItem("app_volume_pct");
+    return vol !== null ? parseFloat(vol) : 0.5; // default 0.5
+}
+
+export async function loadRoundData() {
+    try {
+        const res = await fetch(`https://itunes.apple.com/search?term=pop&limit=50&entity=song&media=music`);
+        const data = await res.json();
+        
+        console.log(data)
+
+        if (!data || !data.results || data.results.length === 0) {
+            throw new Error("Geen nummers gevonden in de iTunes API");
+        }
+
+        // iTunes resultaten hebben altijd een previewUrl
+        const validTracks = data.results.filter((t:any) => t.previewUrl);
+
+        if (validTracks.length < 4) {
+            throw new Error("Niet genoeg nummers met preview beschikbaar");
+        }
+
+        // Kies een random correct nummer
+        const randomIndex = Math.floor(Math.random() * validTracks.length);
+        const selected = validTracks[randomIndex];
+        
+        currentTrack = {
+            id: selected.trackId,
+            name: selected.trackName,
+            artists: [{ name: selected.artistName }],
+            preview_url: selected.previewUrl,
+            image: selected.artworkUrl100
+        };
+        
+        // Kies 3 random foute opties uit de rest van de lijst
+        let others = validTracks.filter((t:any) => t.trackId !== selected.trackId);
+        others.sort(() => 0.5 - Math.random());
+        const distractors = others.slice(0, 3).map((t:any) => ({
+            id: t.trackId,
+            name: t.trackName,
+            artists: [{ name: t.artistName }]
+        }));
+        
+        options = [currentTrack, ...distractors].sort(() => 0.5 - Math.random());
+        
+        // Audio klaarzetten
+        //previewAudio = new Audio(currentTrack.preview_url);
+        //previewAudio.volume = getAppVolume();
+        
+        // Luister naar volume veranderingen in de player bar
+        /*document.querySelector(".vol-bar")?.addEventListener("click", () => {
+            if (previewAudio) {
+                previewAudio.volume = getAppVolume();
+            }
+        });
+        */
+        /*previewAudio.onended = () => {
+            //stopSnippet();
+        };*/
+        return await options;
+        //renderOptions();
+    } catch (err) {
+        console.log(err )
+        /*console.error("[MusicBoys] Game error (iTunes):", err);
+        const container = document.getElementById("options-container");
+        if (container) {
+            container.innerHTML = `<div style="grid-column: 1 / -1; padding: 20px; color: #f87171;">Fout bij laden van muziek: ${err.message}. Probeer opnieuw.</div>`;
+        }
+        const nextBtn = document.getElementById("next-round-btn");
+        if (nextBtn) {
+            nextBtn.style.display = "block";
+            nextBtn.textContent = "RETRY";
+        }
+        gameRoundActive = false;
+        */
+    }
+}
+
+function toggleSnippet() {
+    if (!previewAudio) return;
+    
+    if (gameIsPlayingSnippet) {
+        //pauseSnippet();
+    } else {
+        //playSnippet();
+    }
+}
+/*
+function playSnippet() {
+    if (!previewAudio || gameIsPlayingSnippet) return;
+    
+    previewAudio.play();
+    gameIsPlayingSnippet = true;
+    
+    // Toggle icon naar pause
+    const btn = document.getElementById("game-toggle-btn");
+    btn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+    
+    // Start visualizer
+    document.querySelectorAll(".bar").forEach(bar => bar.classList.add("animating"));
+    
+    // Start timer interval (100ms voor soepele bar)
+    clearInterval(gameTimerInterval);
+    gameTimerInterval = setInterval(() => {
+        gameTimerValue += 100;
+        const percent = (gameTimerValue / 10000) * 100;
+        document.getElementById("game-timer-fill").style.width = `${Math.min(percent, 100)}%`;
+        
+        if (gameTimerValue >= 10000) {
+            stopSnippet();
+        }
+    }, 100);
+}
+
+function pauseSnippet() {
+    if (!previewAudio) return;
+    previewAudio.pause();
+    gameIsPlayingSnippet = false;
+    
+    // Toggle icon naar play
+    const btn = document.getElementById("game-toggle-btn");
+    btn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
+    
+    // Stop visualizer
+    document.querySelectorAll(".bar").forEach(bar => bar.classList.remove("animating"));
+    
+    clearInterval(gameTimerInterval);
+}
+
+function stopSnippet() {
+    pauseSnippet();
+    if (previewAudio) {
+        previewAudio.currentTime = 0;
+    }
+    // We laten de timer staan op waar die was of we resetten hem?
+    // De user kan hem weer opnieuw afspelen zolang ze geen antwoord hebben gegeven
+}
+*/
+function handleAnswer(trackId:any, selectedBtn:any) {
+    if (!gameRoundActive) return;
+    
+    // Stop audio
+    //stopSnippet();
+    
+    const isCorrect = trackId === currentTrack.id;
+    const statusEl = document.getElementById("game-status");
+    const optionsBtns = document.querySelectorAll(".option-btn");
+    
+    /*optionsBtns.forEach(btn => {
+        btn.disabled = true;
+        if (btn.dataset.id === currentTrack.id) {
+            btn.classList.add("correct");
+        } else if (btn === selectedBtn && !isCorrect) {
+            btn.classList.add("wrong");
+        }
+    });
+    
+    if (isCorrect) {
+        gameScore += 10;
+        statusEl.textContent = "Correct! +10 punten";
+        statusEl.style.color = "#4ade80";
+    } else {
+        statusEl.textContent = `Fout! Het was ${currentTrack.name}`;
+        statusEl.style.color = "#f87171";
+    }
+    
+    document.getElementById("next-round-btn").style.display = "block";
+    gameRoundActive = false;
+    */
+}

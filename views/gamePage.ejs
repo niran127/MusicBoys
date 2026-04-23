@@ -17,6 +17,14 @@
                     </form>
                 </div>
             <%}else if(start === true){ %>
+
+            <script>
+                window.gameConfig = {
+                    previewUrl: "<%= currentTrack.preview_url %>"
+                };
+            </script>
+
+            <script src="/scripts/game2.js"></script>
                 <div class="audio-visualizer" id="visualizer">
                 <div class="bar"></div><div class="bar"></div><div class="bar"></div>
                 <div class="bar"></div><div class="bar"></div><div class="bar"></div>
@@ -35,9 +43,12 @@
                 </div>
             </div>
 
-            <div class="options-grid" id="options-container">
-                <div class="loading-pulse" style="grid-column: 1 / -1; padding: 20px;">Laden van fragment...</div>
-            </div>
+            <form class="options-grid" id="options-container" action="http://localhost:1234/musicMatch/game" method="POST">
+                <button class="option-btn" name="answer" value="<%= opt[0].id %>"><span>1</span> <%=opt[0].name%> - <%=opt[0].artists[0].name%></button>
+                <button class="option-btn" name="answer" value="<%= opt[1].id %>"><span>2</span> <%=opt[1].name%> - <%=opt[1].artists[0].name%></button>
+                <button class="option-btn" name="answer" value="<%= opt[2].id %>"><span>3</span> <%=opt[2].name%> - <%=opt[2].artists[0].name%></button>
+                <button class="option-btn" name="answer" value="<%= opt[3].id %>"><span>4</span> <%=opt[3].name%> - <%=opt[3].artists[0].name%></button>
+            </form>
 
             <div class="game-status" id="game-status"></div>
             <button class="next-btn" id="next-round-btn">VOLGENDE RONDE</button>

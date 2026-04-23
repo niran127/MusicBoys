@@ -11,11 +11,13 @@ import {
     getStart,
     getGameRound,
     addOneGameRound,
-    getGameScore
+    getGameScore,
+    loadRoundData,
+    getCurrentTrack
 } from "../data";
 //import type{ Artists,Tracks } from "../types";
 
-
+let options:any = [];
 
 
 export default function():Router{
@@ -52,15 +54,23 @@ export default function():Router{
     })
 
     router.get("/game",(req,res)=>{
-        res.render("gamePage",{page:"game",mood:getMood(),gameScore:getGameScore(),gameRound:getGameRound(),start:getStart()});
+        res.render("gamePage",{page:"game",
+            mood:getMood(),
+            gameScore:getGameScore(),
+            gameRound:getGameRound(),
+            start:getStart(),
+            opt:options,
+            currentTrack:getCurrentTrack()});
     })
 
-    router.post("/game",(req,res)=>{
-        if(req.body.start){
+    router.post("/game",async(req,res)=>{
+        if(req.body.start_knop){
             setStart(true);
             addOneGameRound();
         }
         
+        options = await loadRoundData();
+        console.log(options);
         res.redirect("game");
     })
 
