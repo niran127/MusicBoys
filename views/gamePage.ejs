@@ -1,5 +1,48 @@
 <%- include("partials/head") %> <%- include("partials/aside") %>
 <div id="page-game" >
-    
+    <div class="game-container">
+            <div class="game-header">
+                <h1 class="game-title">Music Quiz</h1>
+                <% if(start === false) {%>
+                    <p class="game-score">Herken populaire hits in 10 seconden!</p>
+                <%}else if(start === true) { %>
+                    <div class="game-score">Score: <%= gameScore %> | Ronde: <%= gameRound %></div>
+                <%}%>
+            </div>
+            <% if(start === false) {%>
+                <div class="game-intro">
+                    <p>Luister naar een fragment van een bekende hit en kies de juiste titel.<br>Je hebt 10 seconden de tijd per nummer.</p>
+                    <form action="http://localhost:1234/musicMatch/game" method="POST">
+                        <button class="start-btn" id="start-game-btn" name="start_knop" value=" ">START QUIZ</button>
+                    </form>
+                </div>
+            <%}else if(start === true){ %>
+                <div class="audio-visualizer" id="visualizer">
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+            </div>
+
+            <div class="game-player-controls">
+                <button class="game-play-btn" id="game-toggle-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                </button>
+                <div class="game-timer-container">
+                    <div class="game-timer-fill" id="game-timer-fill"></div>
+                </div>
+            </div>
+
+            <div class="options-grid" id="options-container">
+                <div class="loading-pulse" style="grid-column: 1 / -1; padding: 20px;">Laden van fragment...</div>
+            </div>
+
+            <div class="game-status" id="game-status"></div>
+            <button class="next-btn" id="next-round-btn">VOLGENDE RONDE</button>
+        </div>
+            <%}%>
+        </div>
 </div>
 <%- include("partials/footer") %>

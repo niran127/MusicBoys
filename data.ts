@@ -3,8 +3,40 @@ import { Artists, Tracks } from "./types";
 const SP_CLIENT_ID = "7c5773b9dcc149b38a50f1d7d83c34a7";
 const SP_CLIENT_SECRET = "f9a584351aac45889f29e806274d73c4";
 
-let mood = "";
-let searchSetting = "track,artist";
+let mood:string = "";
+let searchSetting:string = "track,artist";
+let zoekTerm:string = "";
+let start:boolean = false;
+let gameRound:number = 0;
+let gameScore:number = 0;
+
+export function getGameScore():number{
+    return gameScore;
+}
+
+export function getGameRound():number{
+    return gameRound;
+}
+
+export function addOneGameRound():void{
+    gameRound ++;
+}
+
+export function getStart():boolean{
+    return start;
+}
+
+export function setStart(input:boolean):void{
+    start = input
+}
+
+export function getZoekTerm():string{
+    return zoekTerm;
+}
+
+export function setZoekTerm(input:string):void{
+    zoekTerm = input;
+}
 
 export function getSearchSetting(){
     return searchSetting;
