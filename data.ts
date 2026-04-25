@@ -9,6 +9,16 @@ let zoekTerm:string = "";
 let start:boolean = false;
 let gameRound:number = 0;
 let gameScore:number = 0;
+let answor = false;
+export  let correct = false;
+
+export function getAnswor(){
+    return answor;
+}
+
+export function setAnswor(input:boolean){
+    answor = input
+}
 
 export function getGameScore():number{
     return gameScore;
@@ -293,6 +303,7 @@ export async function loadRoundData() {
         //renderOptions();
     } catch (err) {
         console.log(err )
+        return null;
         /*console.error("[MusicBoys] Game error (iTunes):", err);
         const container = document.getElementById("options-container");
         if (container) {
@@ -368,35 +379,11 @@ function stopSnippet() {
     // De user kan hem weer opnieuw afspelen zolang ze geen antwoord hebben gegeven
 }
 */
-function handleAnswer(trackId:any, selectedBtn:any) {
-    if (!gameRoundActive) return;
-    
-    // Stop audio
-    //stopSnippet();
-    
-    const isCorrect = trackId === currentTrack.id;
-    const statusEl = document.getElementById("game-status");
-    const optionsBtns = document.querySelectorAll(".option-btn");
-    
-    /*optionsBtns.forEach(btn => {
-        btn.disabled = true;
-        if (btn.dataset.id === currentTrack.id) {
-            btn.classList.add("correct");
-        } else if (btn === selectedBtn && !isCorrect) {
-            btn.classList.add("wrong");
-        }
-    });
-    
-    if (isCorrect) {
-        gameScore += 10;
-        statusEl.textContent = "Correct! +10 punten";
-        statusEl.style.color = "#4ade80";
-    } else {
-        statusEl.textContent = `Fout! Het was ${currentTrack.name}`;
-        statusEl.style.color = "#f87171";
+export function handleAnswer(trackId:number):void {  
+    console.log(trackId);
+    console.log(typeof currentTrack.id)
+    correct = trackId == currentTrack.id;
+    if(correct){
+        gameScore++
     }
-    
-    document.getElementById("next-round-btn").style.display = "block";
-    gameRoundActive = false;
-    */
 }
