@@ -1,3 +1,5 @@
+import { ObjectId } from "mongodb"
+
 // hier komen interfaces
 interface Artist{
     name:string,
@@ -47,4 +49,17 @@ export interface Tracks{
     tracks:{
         items:Track[]
     }
+}
+
+export interface User{
+    _id?:ObjectId,
+    name:string,
+    passwor?:string
+}
+
+export interface PlayList{
+    _id?:ObjectId,
+    userId:ObjectId,
+    listName:string,
+    songsId:string[]
 }

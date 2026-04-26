@@ -1,6 +1,7 @@
 import express from "express";
 import path from "path";
 import musicMatch from "./routers/MusicMatch";
+import {connect} from "./data"
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.get("/",(_,res)=>{
     res.redirect("/musicMatch");
 })
 
-app.listen(app.get("port"),()=>{
+app.listen(app.get("port"),async()=>{
+    await connect()
     console.log("http://localhost:1234");
 })

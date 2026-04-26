@@ -19,7 +19,7 @@ import {
     correct,
     handleAnswer
 } from "../data";
-//import type{ Artists,Tracks } from "../types";
+import type{ Artists,Tracks } from "../types";
 
 let options:any = [];
 // Voeg deze functie toe aan je bestand (of een utils.ts)

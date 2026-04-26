@@ -1,7 +1,10 @@
-import { Artists, Tracks } from "./types";
+import test from "node:test";
+import { Artists, Tracks,User,PlayList } from "./types";
+import { Collection, MongoClient, ObjectId } from "mongodb";
 
 const SP_CLIENT_ID = "7c5773b9dcc149b38a50f1d7d83c34a7";
 const SP_CLIENT_SECRET = "f9a584351aac45889f29e806274d73c4";
+const userId:ObjectId = new ObjectId('69ee27d4ab968a0c548a0890'); 
 
 let mood:string = "";
 let searchSetting:string = "track,artist";
@@ -10,6 +13,8 @@ let start:boolean = false;
 let gameRound:number = 0;
 let gameScore:number = 0;
 let answor = false;
+
+
 export  let correct = false;
 
 export function getAnswor(){
@@ -385,5 +390,57 @@ export function handleAnswer(trackId:number):void {
     correct = trackId == currentTrack.id;
     if(correct){
         gameScore++
+    }
+}
+
+export const client = new MongoClient("mongodb+srv://ap-cluster:qjJvDt8FGpOPaYog@ap-cluster.cqjj65z.mongodb.net/");
+export const userCollection: Collection<User> = client.db("MusicMatch").collection<User>("user");
+export const playListCollection: Collection<PlayList> = client.db("MusicMatch").collection<PlayList>("playList");
+
+
+async function exit() {
+    try {
+        await client.close();
+        console.log('Disconnected from database');
+    } catch (error) {
+        console.error(error);
+    }
+    process.exit(0);
+}
+
+async function seed() {
+    const user : User[] = [
+        {
+            _id:new ObjectId(),
+            name:"test"
+        }
+    ];
+    const liked:PlayList[] = user.map((el)=>{
+        return{
+        userId:el._id!,
+        listName:"Likes",
+        songsId:[]
+    }
+    })
+    
+    if (await userCollection.countDocuments() === 0 ) {
+        await userCollection.insertMany(user);
+        await playListCollection.insertMany(liked);
+    }
+
+}
+
+async function getStudents() {
+    return await userCollection.find().toArray();
+}
+
+export async function connect() {
+    try {
+        await client.connect();
+        await seed();
+        console.log('Connected to database');
+        process.on('SIGINT', exit);
+    } catch (error) {
+        console.error(error);
     }
 }
