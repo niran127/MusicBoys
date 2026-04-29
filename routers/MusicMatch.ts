@@ -4,7 +4,7 @@ import {
     searchHandler,
     setMood,
     getSearchSetting,
-    setsearchSetting,
+    setSearchSetting,
     getZoekTerm,
     setZoekTerm,
     setStart,
@@ -14,10 +14,12 @@ import {
     getGameScore,
     loadRoundData,
     getCurrentTrack,
-    getAnswor,
-    setAnswor,
+    getAnswer,
+    setAnswer,
     correct,
-    handleAnswer
+    handleAnswer,
+    getUserAnswer,
+    setUserAnswer
 } from "../data";
 import type{ Artists,Tracks } from "../types";
 
@@ -55,7 +57,7 @@ export default function():Router{
     });
 
     router.post("/search/setting",async(req,res)=>{
-        setsearchSetting(req.body.set);
+        setSearchSetting(req.body.set);
         res.redirect(`${req.baseUrl}/search`);
     })
 
@@ -67,15 +69,17 @@ export default function():Router{
             start:getStart(),
             opt:options,
             currentTrack:await getCurrentTrack(),
-            answor:getAnswor(),
-            correct:correct});
+            answer:getAnswer(),
+            correct:correct,
+            userAnswer:getUserAnswer()});
     })
 
     router.post("/game/start",async(req,res)=>{
         if(req.body.start_knop){
             setStart(true);
             addOneGameRound();
-            setAnswor(false)
+            setAnswer(false);
+            setUserAnswer(null);
         }
         options = await loadRoundData();
         while(options === null){
@@ -87,14 +91,16 @@ export default function():Router{
         res.redirect("/musicMatch/game");
     });
     router.post("/game/answer",async(req,res)=>{
-        setAnswor(true);
-        console.log(req.body.answer)
-        handleAnswer(+req.body.answer)
+        setAnswer(true);
+        const choice = +req.body.answer;
+        setUserAnswer(choice);
+        handleAnswer(choice);
         res.redirect("/musicMatch/game");   
     })
 
     router.post("/game/next",async(req,res)=>{
-        setAnswor(false);
+        setAnswer(false);
+        setUserAnswer(null);
         options = await loadRoundData();
         while(options === null){
             await sleep(2000);

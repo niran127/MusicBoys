@@ -1,0 +1,41 @@
+<%- include("partials/head") %> <%- include("partials/aside") %>
+<div id="page-collections">
+    <div class="topbar">
+        <h1 class="greeting">Jouw Collectie</h1>
+    </div>
+
+    <section>
+        <div class="section-title">Gelikete nummers</div>
+        <div class="action-card" id="collection-likes">
+            <div class="action-icon likes-gradient">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="white">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+            </div>
+            <div class="action-info">
+                <div class="action-title">Liedjes die je leuk vindt</div>
+                <div class="action-sub" id="likes-count">Laden...</div>
+            </div>
+            <svg class="action-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6" />
+            </svg>
+        </div>
+    </section>
+
+    <section style="margin-top: 32px;">
+        <div class="section-title">Je Playlists</div>
+        <div class="playlists-grid" id="collections-playlists">
+            <!-- Wordt gevuld via JS -->
+            <div class="empty-state">Geen playlists gevonden</div>
+        </div>
+        
+        <button class="add-playlist-btn-large" id="btn-new-playlist-collection">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Nieuwe Playlist Maken
+        </button>
+    </section>
+</div>
+<%- include("partials/footer") %>

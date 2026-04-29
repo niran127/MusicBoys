@@ -12,17 +12,26 @@ let zoekTerm:string = "";
 let start:boolean = false;
 let gameRound:number = 0;
 let gameScore:number = 0;
-let answor = false;
+let answer = false;
+let userAnswer: number | null = null;
 
 
 export  let correct = false;
 
-export function getAnswor(){
-    return answor;
+export function getAnswer(){
+    return answer;
 }
 
-export function setAnswor(input:boolean){
-    answor = input
+export function setAnswer(input:boolean){
+    answer = input
+}
+
+export function getUserAnswer(){
+    return userAnswer;
+}
+
+export function setUserAnswer(id: number | null){
+    userAnswer = id;
 }
 
 export function getGameScore():number{
@@ -57,7 +66,7 @@ export function getSearchSetting(){
     return searchSetting;
 }
 
-export function setsearchSetting(input:string){
+export function setSearchSetting(input:string){
     searchSetting = input;
 }
 

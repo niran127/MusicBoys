@@ -17,51 +17,54 @@
                     </form>
                 </div>
             <%}else if(start === true){ %>
-            <% if(answor === false){ %>
-
-            <script>
-                window.gameConfig = {
-                    previewUrl: "<%= currentTrack.preview_url %>"
-                };
-            </script>
-
-            <script src="/scripts/game2.js"></script>
+            <% if(answer === false){ %>
+                <script>
+                    window.gameConfig = {
+                        previewUrl: "<%= currentTrack.preview_url %>"
+                    };
+                </script>
+                <script src="/scripts/game2.js"></script>
                 <div class="audio-visualizer" id="visualizer">
-                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-                <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-            </div>
-
-            <div class="game-player-controls">
-                <button class="game-play-btn" id="game-toggle-btn">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                    </svg>
-                </button>
-                <div class="game-timer-container">
-                    <div class="game-timer-fill" id="game-timer-fill"></div>
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
                 </div>
-            </div>
+
+                <div class="game-player-controls">
+                    <button class="game-play-btn" id="game-toggle-btn">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                        </svg>
+                    </button>
+                    <div class="game-timer-container">
+                        <div class="game-timer-fill" id="game-timer-fill"></div>
+                    </div>
+                </div>
+            <% } %>
 
             <form class="options-grid" id="options-container" action="http://localhost:1234/musicMatch/game/answer" method="POST">
-                <button class="option-btn" name="answer" value="<%= opt[0].id %>"><span>1</span> <%=opt[0].name%> - <%=opt[0].artists[0].name%></button>
-                <button class="option-btn" name="answer" value="<%= opt[1].id %>"><span>2</span> <%=opt[1].name%> - <%=opt[1].artists[0].name%></button>
-                <button class="option-btn" name="answer" value="<%= opt[2].id %>"><span>3</span> <%=opt[2].name%> - <%=opt[2].artists[0].name%></button>
-                <button class="option-btn" name="answer" value="<%= opt[3].id %>"><span>4</span> <%=opt[3].name%> - <%=opt[3].artists[0].name%></button>
+                <% opt.forEach((option, index) => { 
+                    let statusClass = "";
+                    if (answer) {
+                        if (option.id == currentTrack.id) {
+                            statusClass = "correct";
+                        } else if (option.id == userAnswer) {
+                            statusClass = "wrong";
+                        }
+                    }
+                %>
+                    <button class="option-btn <%= statusClass %>" name="answer" value="<%= option.id %>" <%= answer ? 'disabled' : '' %>>
+                        <span><%= index + 1 %></span> <%= option.name %> - <%= option.artists[0].name %>
+                    </button>
+                <% }) %>
             </form>
-            <%}else{%>
-            <div class="game-status" id="game-status">
-                <%if(correct === true){%>
-                <svg height="200px" width="200px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 507.2 507.2" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <circle style="fill:#32BA7C;" cx="253.6" cy="253.6" r="253.6"></circle> <path style="fill:#0AA06E;" d="M188.8,368l130.4,130.4c108-28.8,188-127.2,188-244.8c0-2.4,0-4.8,0-7.2L404.8,152L188.8,368z"></path> <g> <path style="fill:#FFFFFF;" d="M260,310.4c11.2,11.2,11.2,30.4,0,41.6l-23.2,23.2c-11.2,11.2-30.4,11.2-41.6,0L93.6,272.8 c-11.2-11.2-11.2-30.4,0-41.6l23.2-23.2c11.2-11.2,30.4-11.2,41.6,0L260,310.4z"></path> <path style="fill:#FFFFFF;" d="M348.8,133.6c11.2-11.2,30.4-11.2,41.6,0l23.2,23.2c11.2,11.2,11.2,30.4,0,41.6l-176,175.2 c-11.2,11.2-30.4,11.2-41.6,0l-23.2-23.2c-11.2-11.2-11.2-30.4,0-41.6L348.8,133.6z"></path> </g> </g></svg>
-                <%}else{ %>
-                <svg height="200px" width="200px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <ellipse style="fill:#E21B1B;" cx="256" cy="256" rx="256" ry="255.832"></ellipse> <g> <rect x="228.021" y="113.143" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -106.0178 256.0051)" style="fill:#FFFFFF;" width="55.991" height="285.669"></rect> <rect x="113.164" y="227.968" transform="matrix(0.7071 -0.7071 0.7071 0.7071 -106.0134 255.9885)" style="fill:#FFFFFF;" width="285.669" height="55.991"></rect> </g> </g></svg>
-                <%}%>
-            </div>
-            <form action="/musicMatch/game/next" method="post">
-                <button class="next-btn" id="next-round-btn" name="next" value="a">VOLGENDE RONDE</button>
-            </form>
-            <%}%>
+
+            <% if(answer === true){ %>
+                <form action="/musicMatch/game/next" method="post">
+                    <button class="next-btn" id="next-round-btn" name="next" value="a">VOLGENDE RONDE</button>
+                </form>
+            <% } %>
         </div>
             <%}%>
         </div>
