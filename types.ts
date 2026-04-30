@@ -17,6 +17,7 @@ interface Artist{
 }
 
 interface Track{
+    id:string,
     name:string,
     popularity:number,
     duration_ms:number,

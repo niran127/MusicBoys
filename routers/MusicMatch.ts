@@ -19,7 +19,9 @@ import {
     correct,
     handleAnswer,
     getUserAnswer,
-    setUserAnswer
+    setUserAnswer,
+    likeHandler,
+    likesHandler
 } from "../data";
 import type{ Artists,Tracks } from "../types";
 
@@ -86,8 +88,7 @@ export default function():Router{
             await sleep(2000);
             options = await loadRoundData();
         }
-        
-        console.log(options);
+
         res.redirect("/musicMatch/game");
     });
     router.post("/game/answer",async(req,res)=>{
@@ -110,5 +111,20 @@ export default function():Router{
         res.redirect("/musicMatch/game");
     })
 
+    router.post("/search/like",async(req,res)=>{
+        
+        await likeHandler(req.body.likeId);
+        res.redirect("/musicMatch/search");
+    })
+
+    router.get("/likes",async(req,res)=>{
+        const data = await likesHandler();
+         res.render("likePage",{page:"",results:data,mood:getMood()})
+    })
+
+    router.post("/likePage/like",async(req,res)=>{
+        await likeHandler(req.body.likeId);
+        res.redirect("/musicMatch/likes");
+    })
     return router;
 }

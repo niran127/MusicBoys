@@ -1,10 +1,14 @@
-import test from "node:test";
+import test, { it } from "node:test";
 import { Artists, Tracks,User,PlayList } from "./types";
 import { Collection, MongoClient, ObjectId } from "mongodb";
 
 const SP_CLIENT_ID = "7c5773b9dcc149b38a50f1d7d83c34a7";
 const SP_CLIENT_SECRET = "f9a584351aac45889f29e806274d73c4";
 const userId:ObjectId = new ObjectId('69ee27d4ab968a0c548a0890'); 
+
+export const client = new MongoClient("mongodb+srv://ap-cluster:qjJvDt8FGpOPaYog@ap-cluster.cqjj65z.mongodb.net/");
+export const userCollection: Collection<User> = client.db("MusicMatch").collection<User>("user");
+export const playListCollection: Collection<PlayList> = client.db("MusicMatch").collection<PlayList>("playList");
 
 let mood:string = "";
 let searchSetting:string = "track,artist";
@@ -15,6 +19,7 @@ let gameScore:number = 0;
 let answer = false;
 let userAnswer: number | null = null;
 
+const userName:string = "test";
 
 export  let correct = false;
 
@@ -164,7 +169,8 @@ async function spotifySearch(query: string, type: string) {
 }
 
 export async function searchHandler(query:string,type:string){
-    
+    const likeList = await playListCollection.findOne({listName:"Likes"})
+
     if (!query || !type) return;
     const queryTrim = query.trim();
     if (!queryTrim) return;
@@ -192,6 +198,7 @@ export async function searchHandler(query:string,type:string){
       } else {
         return tracks.tracks.items.map((el)=>{
             return{
+                liked:likeList!.songsId.find(item=>item===el.id),
                 type:"track",
                 img:el.album.images[0],
                 name:el.name,
@@ -207,6 +214,7 @@ export async function searchHandler(query:string,type:string){
       if (data.artists && data.artists.items) {
          art = data.artists.items.map((el:any)=>{
             return {
+                id:el.id,
                 type:"artist",
                 img: el.images[0],
                 name:el.name,
@@ -217,6 +225,8 @@ export async function searchHandler(query:string,type:string){
       if (data.tracks && data.tracks.items) {
          tra = data.tracks.items.map((el:any)=>{
             return{
+                liked:likeList!.songsId.find(item=>item===el.id),
+                id:el.id,
                 type:"track",
                 img:el.album.images[0],
                 name:el.name,
@@ -243,27 +253,15 @@ export async function searchHandler(query:string,type:string){
 
 let currentTrack:any = null;
 let options:any = [];
-let previewAudio:any = null;
-let gameTimerInterval:any = null;
-let gameTimerValue = 0;
-let gameIsPlayingSnippet = false;
-let gameRoundActive = false;
 
 export function getCurrentTrack(){
     return currentTrack;
-}
-
-function getAppVolume() {
-    const vol = localStorage.getItem("app_volume_pct");
-    return vol !== null ? parseFloat(vol) : 0.5; // default 0.5
 }
 
 export async function loadRoundData() {
     try {
         const res = await fetch(`https://itunes.apple.com/search?term=pop&limit=50&entity=song&media=music`);
         const data = await res.json();
-        
-        console.log(data)
 
         if (!data || !data.results || data.results.length === 0) {
             throw new Error("Geen nummers gevonden in de iTunes API");
@@ -299,113 +297,19 @@ export async function loadRoundData() {
         
         options = [currentTrack, ...distractors].sort(() => 0.5 - Math.random());
         
-        // Audio klaarzetten
-        //previewAudio = new Audio(currentTrack.preview_url);
-        //previewAudio.volume = getAppVolume();
-        
-        // Luister naar volume veranderingen in de player bar
-        /*document.querySelector(".vol-bar")?.addEventListener("click", () => {
-            if (previewAudio) {
-                previewAudio.volume = getAppVolume();
-            }
-        });
-        */
-        /*previewAudio.onended = () => {
-            //stopSnippet();
-        };*/
         return await options;
-        //renderOptions();
     } catch (err) {
         console.log(err )
         return null;
-        /*console.error("[MusicBoys] Game error (iTunes):", err);
-        const container = document.getElementById("options-container");
-        if (container) {
-            container.innerHTML = `<div style="grid-column: 1 / -1; padding: 20px; color: #f87171;">Fout bij laden van muziek: ${err.message}. Probeer opnieuw.</div>`;
-        }
-        const nextBtn = document.getElementById("next-round-btn");
-        if (nextBtn) {
-            nextBtn.style.display = "block";
-            nextBtn.textContent = "RETRY";
-        }
-        gameRoundActive = false;
-        */
     }
 }
 
-function toggleSnippet() {
-    if (!previewAudio) return;
-    
-    if (gameIsPlayingSnippet) {
-        //pauseSnippet();
-    } else {
-        //playSnippet();
-    }
-}
-/*
-function playSnippet() {
-    if (!previewAudio || gameIsPlayingSnippet) return;
-    
-    previewAudio.play();
-    gameIsPlayingSnippet = true;
-    
-    // Toggle icon naar pause
-    const btn = document.getElementById("game-toggle-btn");
-    btn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
-    
-    // Start visualizer
-    document.querySelectorAll(".bar").forEach(bar => bar.classList.add("animating"));
-    
-    // Start timer interval (100ms voor soepele bar)
-    clearInterval(gameTimerInterval);
-    gameTimerInterval = setInterval(() => {
-        gameTimerValue += 100;
-        const percent = (gameTimerValue / 10000) * 100;
-        document.getElementById("game-timer-fill").style.width = `${Math.min(percent, 100)}%`;
-        
-        if (gameTimerValue >= 10000) {
-            stopSnippet();
-        }
-    }, 100);
-}
-
-function pauseSnippet() {
-    if (!previewAudio) return;
-    previewAudio.pause();
-    gameIsPlayingSnippet = false;
-    
-    // Toggle icon naar play
-    const btn = document.getElementById("game-toggle-btn");
-    btn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>`;
-    
-    // Stop visualizer
-    document.querySelectorAll(".bar").forEach(bar => bar.classList.remove("animating"));
-    
-    clearInterval(gameTimerInterval);
-}
-
-function stopSnippet() {
-    pauseSnippet();
-    if (previewAudio) {
-        previewAudio.currentTime = 0;
-    }
-    // We laten de timer staan op waar die was of we resetten hem?
-    // De user kan hem weer opnieuw afspelen zolang ze geen antwoord hebben gegeven
-}
-*/
 export function handleAnswer(trackId:number):void {  
-    console.log(trackId);
-    console.log(typeof currentTrack.id)
     correct = trackId == currentTrack.id;
     if(correct){
         gameScore++
     }
 }
-
-export const client = new MongoClient("mongodb+srv://ap-cluster:qjJvDt8FGpOPaYog@ap-cluster.cqjj65z.mongodb.net/");
-export const userCollection: Collection<User> = client.db("MusicMatch").collection<User>("user");
-export const playListCollection: Collection<PlayList> = client.db("MusicMatch").collection<PlayList>("playList");
-
 
 async function exit() {
     try {
@@ -439,8 +343,8 @@ async function seed() {
 
 }
 
-async function getStudents() {
-    return await userCollection.find().toArray();
+async function getUserByName():Promise<User | null> {
+    return await userCollection.findOne({name:userName});
 }
 
 export async function connect() {
@@ -452,4 +356,63 @@ export async function connect() {
     } catch (error) {
         console.error(error);
     }
+}
+
+export async function likeHandler(id:string) {
+    const userId = await getUserByName();
+    let likesList = await playListCollection.findOne({
+        userId:userId!._id,
+        listName:"Likes"
+    });
+
+    if(likesList?.songsId.includes(id)){
+        await playListCollection.updateOne(
+            { userId: userId!._id, listName: "Likes" },
+            { $pull: { songsId: id } }
+        );
+    }
+    else{
+        await playListCollection.updateOne(
+            { userId: userId!._id, listName: "Likes" },
+            { $addToSet: { songsId: id } } // Maakt de lijst aan als deze nog niet bestaat!
+        );
+    }
+}
+
+async function opIdsZoekSpotify():Promise<any> {
+    const userId = await getUserByName();
+    const token = await getAuthToken();
+    const ids:PlayList|null = await playListCollection.findOne({listName:"Likes",userId:userId!._id})
+    if(ids?.songsId .length !== 0){
+    const idsString = ids?.songsId.join(",");
+
+    const response = await fetch(`https://api.spotify.com/v1/tracks?ids=${idsString}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    const data:any = await response.json();
+    return data;
+}
+    return null
+}
+
+export async function likesHandler():Promise<any>{
+    const data = await opIdsZoekSpotify()
+    
+    if(data !== null){
+    const tra = data.tracks.map((el:any)=>{
+            return{
+                liked:true,
+                id:el.id,
+                type:"track",
+                img:el.album.images[0],
+                name:el.name,
+                artistsStr:el.artists.map((el:any)=>el.name).join(","),
+                artistUri:el.artists[0].id,
+                uri:el.uri
+            }
+        });
+    return tra;
+    }
+    return null;
 }
