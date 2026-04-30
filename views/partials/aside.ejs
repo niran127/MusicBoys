@@ -8,7 +8,7 @@
                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
                </svg>
-               Home
+               <span class="nav-text">Home</span>
             </a>
             <a href="/musicMatch/search" class="nav-item <%= page === "search"? "active" : "" %>" id="nav-zoeken">
                <svg
@@ -23,7 +23,7 @@
                   <circle cx="11" cy="11" r="8" />
                   <line x1="21" y1="21" x2="16.65" y2="16.65" />
                </svg>
-               Zoeken
+               <span class="nav-text">Zoeken</span>
             </a>
             <a href="/musicMatch/likes" class="nav-item desktop-hidden" id="nav-collectie">
                <svg
@@ -40,7 +40,7 @@
                      d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
                      />
                </svg>
-               Collectie
+               <span class="nav-text">Collectie</span>
             </a>
             <a href="/musicMatch/game" class="nav-item <%= page === "game"? "active" : "" %>" id="nav-game">
                <svg
@@ -54,7 +54,7 @@
                   >
                   <polygon points="5 3 19 12 5 21 5 3" />
                </svg>
-               Game
+               <span class="nav-text">Game</span>
             </a>
             <div class="nav-label" style="margin-top: 20px">Playlists</div>
             <div class="nav-item" id="nav-new-playlist">
@@ -70,7 +70,7 @@
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                </svg>
-               Nieuw
+               <span class="nav-text">Nieuw</span>
             </div>
             <a href="/musicMatch/likes" class="nav-item" id="nav-likes">
                <svg
@@ -85,7 +85,7 @@
                      d="M34,9c-4.2,0-7.9,2.1-10,5.4C21.9,11.1,18.2,9,14,9C7.4,9,2,14.4,2,21c0,11.9,22,24,22,24s22-12,22-24C46,14.4,40.6,9,34,9z"
                      />
                </svg>
-               Likes
+               <span class="nav-text">Likes</span>
             </a>
             <div id="custom-playlists-list"></div>
          </nav>

@@ -16,6 +16,10 @@
   -webkit-text-fill-color: transparent;
 }
 
+nav a {
+  text-decoration: none;
+}
+
 nav {
   display: flex;
   flex-direction: column;
