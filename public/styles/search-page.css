@@ -1,11 +1,12 @@
-/* Container voor de hele zoeksectie */
+/* --- Bestaande variabelen (ter referentie) --- */
+
+/* --- Zoekbalk Sectie --- */
 .search-bar {
   display: flex;
   gap: 10px;
   margin-bottom: 14px;
 }
 
-/* De wrapper die de border en achtergrond bevat */
 .search-input-wrap {
   flex: 1;
   display: flex;
@@ -14,22 +15,20 @@
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding-left: 16px; /* Alleen links padding voor het icoontje */
+  padding-left: 16px;
   transition: border-color 0.15s;
-  overflow: hidden; /* Zorgt dat de knop niet buiten de border-radius valt */
+  overflow: hidden;
 }
 
 .search-input-wrap:focus-within {
   border-color: var(--accent);
 }
 
-/* Het vergrootglas icoontje */
 .search-input-wrap svg {
   color: var(--muted);
   flex-shrink: 0;
 }
 
-/* HET FORMULIER: Neemt de flex-rol over */
 .search-input-wrap form {
   flex: 1;
   display: flex;
@@ -38,7 +37,6 @@
   height: 100%;
 }
 
-/* Het invoerveld */
 .search-input-wrap input {
   flex: 1;
   background: none;
@@ -54,14 +52,13 @@
   color: var(--muted);
 }
 
-/* De zoekknop binnen de wrap */
 .search-btn {
   background: linear-gradient(135deg, var(--accent), var(--accent2));
   border: none;
   border-radius: var(--radius);
   padding: 0 24px;
-  margin: 4px; /* Kleine ruimte rondom de knop binnen de balk */
-  height: calc(100% - 8px); /* Vult de hoogte minus de margin */
+  margin: 4px;
+  height: calc(100% - 8px);
   font-family: "DM Sans", sans-serif;
   font-size: 0.88rem;
   font-weight: 600;
@@ -76,7 +73,7 @@
   box-shadow: 0 4px 15px rgba(124, 92, 252, 0.3);
 }
 
-/* Filter chips onder de zoekbalk */
+/* --- Filter Chips --- */
 .filter-chips {
   display: flex;
   gap: 8px;
@@ -105,4 +102,78 @@
   background: rgba(124, 92, 252, 0.15);
   border-color: var(--accent);
   color: var(--accent);
+}
+
+/* --- TRACK ROW & LINK FIXES --- */
+
+/* De container van de hele rij */
+.track-row {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-radius: var(--radius);
+  transition: background 0.2s;
+  position: relative; /* Cruciaal voor z-index van kinderen */
+}
+
+.track-row:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Zorg dat de info-sectie boven de klikbare rij-laag ligt */
+.track-info {
+  flex: 1;
+  position: relative;
+  z-index: 5; 
+}
+
+/* DE OPLOSSING VOOR DE LINK: 
+   Zorgt dat de <a> tag prioriteit krijgt boven de JS-klik op de rij */
+.track-name {
+  display: inline-block;
+  text-decoration: none;
+  color: var(--text);
+  position: relative;
+  z-index: 10; /* Hoger dan de rest */
+  pointer-events: auto !important; /* Forceert klikbaarheid */
+}
+
+.track-title-link {
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.track-name:hover .track-title-link {
+  text-decoration: underline;
+  color: var(--accent2);
+}
+
+/* Voorkom dat de link de hele rij 'blokkeert' maar wel zelf klikbaar blijft */
+.track-artist {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+/* Zorg dat knoppen ook klikbaar blijven */
+.track-actions {
+  display: flex;
+  gap: 10px;
+  position: relative;
+  z-index: 10;
+}
+
+.track-like-btn, .track-add-btn {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.track-like-btn.liked {
+  color: var(--accent);
+}
+
+.track-like-btn:hover {
+  color: var(--text);
 }

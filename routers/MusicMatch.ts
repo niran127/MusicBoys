@@ -21,7 +21,8 @@ import {
     getUserAnswer,
     setUserAnswer,
     likeHandler,
-    likesHandler
+    likesHandler,
+    getTrackById
 } from "../data";
 import type{ Artists,Tracks } from "../types";
 
@@ -46,7 +47,7 @@ export default function():Router{
     router.get("/search",async(req,res)=>{ 
         const set = getSearchSetting();   
         const data =  await searchHandler(getZoekTerm(),set); 
-        
+
         setStart(false);
         res.render("searchPage",{page:"search",results:data,set,mood:getMood()})
     });
@@ -112,7 +113,7 @@ export default function():Router{
     })
 
     router.post("/search/like",async(req,res)=>{
-        
+        console.log(req.body.likedId);
         await likeHandler(req.body.likeId);
         res.redirect("/musicMatch/search");
     })
@@ -126,5 +127,10 @@ export default function():Router{
         await likeHandler(req.body.likeId);
         res.redirect("/musicMatch/likes");
     })
+
+    router.get("/detail/:id",async(req,res)=>{
+        res.render("detailPageTrack",await getTrackById(req.params.id));
+    })
+
     return router;
 }

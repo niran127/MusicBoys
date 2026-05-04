@@ -198,6 +198,7 @@ export async function searchHandler(query:string,type:string){
       } else {
         return tracks.tracks.items.map((el)=>{
             return{
+                id:el.id,
                 liked:likeList!.songsId.find(item=>item===el.id),
                 type:"track",
                 img:el.album.images[0],
@@ -383,7 +384,7 @@ async function opIdsZoekSpotify():Promise<any> {
     const userId = await getUserByName();
     const token = await getAuthToken();
     const ids:PlayList|null = await playListCollection.findOne({listName:"Likes",userId:userId!._id})
-    if(ids?.songsId .length !== 0){
+    if(ids?.songsId.length !== 0){
     const idsString = ids?.songsId.join(",");
 
     const response = await fetch(`https://api.spotify.com/v1/tracks?ids=${idsString}`, {
@@ -415,4 +416,26 @@ export async function likesHandler():Promise<any>{
     return tra;
     }
     return null;
+}
+
+export async function getTrackById(id:string) {
+    const token = await getAuthToken();
+    const response = await fetch(`https://api.spotify.com/v1/tracks?ids=${id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const userId = await getUserByName();
+    const liked:PlayList|null = await playListCollection.findOne({listName:"Likes",userId:userId!._id});
+
+    const data = await response.json();
+
+    console.log(data.tracks[0].album)
+
+    return {
+        img:data.tracks[0].album.images[0].url,
+        track:data.tracks[0],
+        isLiked:liked?.songsId.includes(id),
+        page:"",
+        mood:getMood(),
+        artists:data.tracks[0].artists.map((a:any) => a.name).join(", ")
+    }
 }

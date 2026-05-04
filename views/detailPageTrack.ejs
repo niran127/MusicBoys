@@ -1,0 +1,36 @@
+<%- include("partials/head") %> <%- include("partials/aside") %>
+<div id="page-detail">
+    <div class="detail-header track-header" style="background: linear-gradient(135deg, var(--accent), var(--bg))">
+        <button class="detail-close-btn" title="sluiten">&times;</button>
+        <div class="detail-header-flex">
+          <img src="<%=img%>" class="detail-cover-large" alt="<%=track.name%>">
+          <div class="detail-header-content">
+            <span class="detail-badge">nummer</span>
+            <h1 class="detail-title"><%=track.name%></h1>
+            <div class="detail-meta">
+              <span class="track-artist-link" data-uri="<%=track.artists[0].uri%>" style="font-weight: 700; cursor: pointer;"><%=artists%></span>
+              <span>·</span>
+              <span><%=track.album.name%></span>
+              <span>·</span>
+              <span><%=track.album.release_date.split("-")[0]%></span>
+            </div>
+            <div class="detail-actions">
+              <button class="play-main-btn">AFSPELEN</button>
+              <button class="detail-like-btn <%=isLiked ? "liked" : ""%>" data-uri="<%=track.uri%>"><%=isLiked ? "geliket" : "like"%></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="detail-content">
+        <section style="margin-top: 40px">
+          <h3 class="section-subtitle">details</h3>
+          <div class="track-details-list">
+            <div class="detail-item"><span>populariteit</span> <span><%=track.popularity%>/100</span></div>
+            <div class="detail-item"><span>duur</span> <span><%=track.duration%></span></div>
+            <div class="detail-item"><span>uitgebracht</span> <span><%=track.releaseDate%></span></div>
+            <div class="detail-item"><span>album</span> <span><%=track.album.name%></span></div>
+          </div>
+        </section>
+      </div>
+</div>
+<%- include("partials/footer") %>
