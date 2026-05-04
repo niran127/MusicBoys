@@ -106,6 +106,8 @@
     align-items: stretch;
   }
 
+  nav a{ text-decoration: none;}
+
   /* nav labels verbergen */
   aside .nav-label {
     display: none !important;
@@ -143,10 +145,13 @@
   }
 
   aside .nav-item svg {
-    width: 22px;
-    height: 22px;
+    width: 28px;
+    height: 28px;
   }
-
+  /* hide nav namen onder icons */
+  aside.sidebar .nav-text {
+    display: none;
+  }
   /* collectie tonen in bottom bar */
   aside .desktop-hidden {
     display: flex !important;
