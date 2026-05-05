@@ -122,6 +122,7 @@
 
 /* Zorg dat de info-sectie boven de klikbare rij-laag ligt */
 .track-info {
+  text-decoration: none;
   flex: 1;
   position: relative;
   z-index: 5; 

@@ -1,7 +1,7 @@
 <%- include("partials/head") %> <%- include("partials/aside") %>
 <div id="page-detail">
     <div class="detail-header track-header" style="background: linear-gradient(135deg, var(--accent), var(--bg))">
-        <button class="detail-close-btn" title="sluiten">&times;</button>
+        <a href="/musicMatch/search" class="detail-close-btn" title="sluiten">&times;</a>
         <div class="detail-header-flex">
           <img src="<%=img%>" class="detail-cover-large" alt="<%=track.name%>">
           <div class="detail-header-content">
@@ -14,10 +14,10 @@
               <span>·</span>
               <span><%=track.album.release_date.split("-")[0]%></span>
             </div>
-            <div class="detail-actions">
+            <form action="" method="post" class="detail-actions">
               <button class="play-main-btn">AFSPELEN</button>
-              <button class="detail-like-btn <%=isLiked ? "liked" : ""%>" data-uri="<%=track.uri%>"><%=isLiked ? "geliket" : "like"%></button>
-            </div>
+              <button name="likeButton" value="track.id" class="detail-like-btn <%=isLiked ? "liked" : ""%>" data-uri="<%=track.uri%>"><%=isLiked ? "geliket" : "like"%></button>
+            </form>
           </div>
         </div>
       </div>
@@ -26,8 +26,8 @@
           <h3 class="section-subtitle">details</h3>
           <div class="track-details-list">
             <div class="detail-item"><span>populariteit</span> <span><%=track.popularity%>/100</span></div>
-            <div class="detail-item"><span>duur</span> <span><%=track.duration%></span></div>
-            <div class="detail-item"><span>uitgebracht</span> <span><%=track.releaseDate%></span></div>
+            <div class="detail-item"><span>duur</span> <span><%=Math.round(track.duration_ms/1000)%>s</span></div>
+            <div class="detail-item"><span>uitgebracht</span> <span><%=track.album.release_date%></span></div>
             <div class="detail-item"><span>album</span> <span><%=track.album.name%></span></div>
           </div>
         </section>

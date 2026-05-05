@@ -113,7 +113,6 @@ export default function():Router{
     })
 
     router.post("/search/like",async(req,res)=>{
-        console.log(req.body.likedId);
         await likeHandler(req.body.likeId);
         res.redirect("/musicMatch/search");
     })
@@ -128,8 +127,14 @@ export default function():Router{
         res.redirect("/musicMatch/likes");
     })
 
-    router.get("/detail/:id",async(req,res)=>{
+    router.get("/detail/:id/track",async(req,res)=>{
+        console.log(await getTrackById(req.params.id))
         res.render("detailPageTrack",await getTrackById(req.params.id));
+    })
+
+    router.post("/detail/:id/track",async(req,res)=>{
+        await likeHandler(req.params.id)
+        res.redirect(`${req.baseUrl}/detail/${req.params.id}/track`);
     })
 
     return router;

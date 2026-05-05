@@ -151,6 +151,7 @@
 }
 
 .detail-close-btn {
+  text-decoration: none;
   position: absolute;
   top: 32px;
   right: 32px;
