@@ -16,13 +16,13 @@
       <link rel="stylesheet" href="/styles/game.css" />
       <link rel="stylesheet" href="/styles/modals.css" />
       <link rel="stylesheet" href="/styles/mobile.css" />
-
       <script>
          window._spSDKFired = false;
          window.SP_CLIENT_ID = "<%= spClientId %>";
+         window.REDIRECT_URI = "<%= process.env.REDIRECT_URI || 'http://127.0.0.1:3050/app' %>";
          window.onSpotifyWebPlaybackSDKReady = function () {
-           window._spSDKFired = true;
-           if (window._initSpotifyPlayer) window._initSpotifyPlayer();
+         window._spSDKFired = true;
+         if (window._initSpotifyPlayer) window._initSpotifyPlayer();
          };
       </script>
       <script src="/scripts/spotify.js" defer></script>
