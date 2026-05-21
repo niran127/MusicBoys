@@ -1,6 +1,6 @@
 const SP_CLIENT_ID = window.SP_CLIENT_ID;
 
-const SP_REDIRECT_URI = "http://127.0.0.1:3050/app";
+const REDIRECT_URI = process.env.REDIRECT_URI || "http://127.0.0.1:3050/app"
 const SP_SCOPES =
   "streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state";
 const VOLUME_LIMIT = 0.5;
