@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "target": "esnext",
+    "lib": ["esnext"],
+    "types": ["node"],
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "include": ["app.ts", "routers/**/*.ts", "middleware/**/*.ts", "models/**/*.ts", "interfaces/**/*.ts", "utils/**/*.ts"]
+}

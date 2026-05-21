@@ -1,0 +1,39 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap");
+
+:root {
+  --bg: #0a0a0f;
+  --surface: #111118;
+  --card: #18181f;
+  --border: #252530;
+  --accent: #5cb4fc;
+  --accent2: #896dd7;
+  --muted: #6b6b7b;
+  --text: #e8e8f0;
+  --text-dim: #9494a8;
+  --radius: 14px;
+}
+
+/* Light theme */
+:root.light-theme {
+  --bg: #f5f5f7;
+  --surface: #ffffff;
+  --card: #f0f0f5;
+  --border: #e2e2e8;
+  --text: #1d1d1f;
+  --text-dim: #424245;
+  --muted: #86868b;
+}
+
+/* Themes per mood */
+body.theme-chill { --accent: #1db954; --bg: #020802; --surface: #050e05; }
+body.theme-focus { --accent: #5cb4fc; --bg: #07070a; --surface: #0a0a0e; }
+body.theme-party { --accent: #ff4dff; --bg: #0e030e; --surface: #110711; }
+body.theme-sad { --accent: #718096; --bg: #04060a; --surface: #0e131b; }
+body.theme-workout { --accent: #ff8c00; --bg: #050501; --surface: #0f0f06; }
+
+/* Themes per mood light */
+:root.light-theme body.theme-chill { --bg: #f2faf3; --surface: #ffffff; --border: #dcece0; }
+:root.light-theme body.theme-focus { --bg: #f5faff; --surface: #ffffff; --border: #e2ebf5; }
+:root.light-theme body.theme-party { --bg: #fef5ff; --surface: #ffffff; --border: #f5e8f5; }
+:root.light-theme body.theme-sad { --bg: #f8fafc; --surface: #ffffff; --border: #e2e8f0; }
+:root.light-theme body.theme-workout { --bg: #fffcf5; --surface: #ffffff; --border: #f5eedc; }

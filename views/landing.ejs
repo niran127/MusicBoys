@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MusicMatch - Maak je keuze</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <style>
+        body {
+            background: #000;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+        .landing-container {
+            text-align: center;
+            max-width: 900px;
+            width: 100%;
+            padding: 20px;
+            z-index: 10;
+        }
+        .logo {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 50px;
+            letter-spacing: -2px;
+            background: linear-gradient(to right, #1db954, #1ed760);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .choices-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 50px;
+        }
+        .choice-card {
+            background: #121212;
+            border: 1px solid #282828;
+            padding: 40px 20px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .choice-card:hover {
+            transform: translateY(-10px);
+            border-color: #1db954;
+            background: #181818;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        .choice-card h2 {
+            font-size: 1.5rem;
+            margin: 20px 0 10px;
+            font-weight: 800;
+        }
+        .choice-card p {
+            color: #b3b3b3;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .choice-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        .btn-logout {
+            margin-top: 60px;
+            background: transparent;
+            border: 1px solid #333;
+            color: #888;
+            padding: 10px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-logout:hover {
+            border-color: #fff;
+            color: #fff;
+        }
+        @media (max-width: 768px) {
+            .choices-grid {
+                grid-template-columns: 1fr;
+            }
+            .logo { font-size: 2rem; }
+        }
+        .glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(29, 185, 84, 0.1) 0%, rgba(0,0,0,0) 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="glow"></div>
+    <div class="landing-container">
+        <div class="logo">MusicMatch</div>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 30px;">
+            <div class="avatar" style="width: 50px; height: 50px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.2rem; overflow: hidden; border: 2px solid #444; flex-shrink: 0;">
+                <% if (user.profileImageUrl) { %>
+                    <img src="<%= user.profileImageUrl %>" style="width: 100%; height: 100%; object-fit: cover;">
+                <% } else { %>
+                    <%= user.name.charAt(0).toUpperCase() %>
+                <% } %>
+            </div>
+            <h1 style="font-weight: 800; margin: 0; font-size: 2.2rem; letter-spacing: -1px;">Welkom terug, <%= user.name %>!</h1>
+        </div>
+        <p style="color: #888; margin-bottom: 40px;">Selecteer een app om te starten</p>
+        
+        <div class="choices-grid">
+            <a href="/app" class="choice-card">
+                <div class="choice-icon">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#1db954" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 18V5l12-2v13"></path>
+                        <circle cx="6" cy="18" r="3"></circle>
+                        <circle cx="18" cy="16" r="3"></circle>
+                    </svg>
+                </div>
+                <h2>MusicMatch</h2>
+                <p>Vind nieuwe nummers en test je muziekjennis</p>
+            </a>
+            
+            <div class="choice-card" style="opacity: 0.5; cursor: not-allowed;">
+                <div class="choice-icon">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/24/LEGO_logo.svg" alt="LEGO" style="width: 60px; height: 60px; border-radius: 8px;">
+                </div>
+                <h2>Lego</h2>
+                <p>Momenteel niet beschikbaar.</p>
+            </div>
+            
+            <div class="choice-card" style="opacity: 0.5; cursor: not-allowed;">
+                <div class="choice-icon">
+                    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#5cb4fc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="6" y1="12" x2="10" y2="12"></line>
+                        <line x1="8" y1="10" x2="8" y2="14"></line>
+                        <line x1="15" y1="13" x2="15.01" y2="13"></line>
+                        <line x1="18" y1="11" x2="18.01" y2="11"></line>
+                        <rect x="2" y="6" width="20" height="12" rx="2"></rect>
+                    </svg>
+                </div>
+                <h2>Gamehub</h2>
+                <p>Momenteel niet beschikbaar.</p>
+            </div>
+        </div>
+        
+        <form action="/logout" method="POST">
+            <button type="submit" class="btn-logout">Uitloggen</button>
+        </form>
+    </div>
+</body>
+</html>

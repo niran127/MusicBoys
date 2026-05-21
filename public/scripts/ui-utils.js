@@ -1,0 +1,314 @@
+function renderTrackRow(
+  imageUrl,
+  name,
+  subtitle,
+  type,
+  trackUri = null,
+  isLiked = false,
+  artistUri = null,
+  artistNameMetadata = null,
+) {
+  const eName = name.replace(/"/g, "&quot;");
+  const eSub = subtitle.replace(/"/g, "&quot;");
+  const eArtistMeta = (artistNameMetadata || subtitle).replace(/"/g, "&quot;");
+  const isTrack = type === "Nummer";
+  const data =
+    trackUri && isTrack
+      ? `data-uri="${trackUri}" data-name="${eName}" data-artist="${eArtistMeta}" data-image="${imageUrl || ""}" data-type="${type}" ${artistUri ? `data-artist-uri="${artistUri}"` : ""}`
+      : `data-type="${type}" ${artistUri ? `data-artist-uri="${artistUri}"` : ""}`;
+  const isOnPlaylist = document.getElementById("page-playlist")?.style.display !== "none" || false;
+  const isRemove = isOnPlaylist && isTrack;
+
+  const playIcon =
+    isTrack && trackUri
+      ? `
+    <div class="play-overlay">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+      </svg>
+    </div>
+  `
+      : "";
+  return `
+    <div class="track-row${isTrack && trackUri ? " playable" : ""}" ${data}>
+      <div class="track-art-container">
+        ${
+          imageUrl
+            ? `<img class="track-art" src="${imageUrl}" alt="${name}" onerror="this.style.display='none'">`
+            : `<div class="track-art-placeholder">:(</div>`
+        }
+        ${playIcon}
+      </div>
+      <div class="track-info">
+        <div class="track-name"><span class="track-title-link">${name}</span></div>
+        <div class="track-artist"><span class="track-artist-link">${subtitle}</span></div>
+      </div>
+      <span class="track-type-badge">${type}</span>
+      ${isTrack ? `
+      <button class="track-add-btn ${isRemove ? "remove-btn" : ""}" title="${isRemove ? "verwijderen" : "toevoegen"}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          ${isRemove 
+            ? `<line x1="5" y1="12" x2="19" y2="12"></line>` 
+            : `<line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>`
+          }
+        </svg>
+      </button>
+      <button class="track-like-btn ${isLiked ? "liked" : ""}" title="like">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+      </button>
+      ` : `
+      <button class="track-follow-btn" title="volgen" style="background: var(--accent); color: white; border: none; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; cursor: pointer;">
+        Volgen
+      </button>
+      `}
+    </div>
+  `;
+}
+// Global toggle voor likes (met DB sync)
+async function toggleGlobalLike(uri, meta) {
+  if (typeof window.getTrackId !== "function") return false;
+  const id = window.getTrackId(uri);
+  const likes = typeof getLikes === "function" ? getLikes() : [];
+  const isCurrentlyLiked = likes.some(l => window.getTrackId(l.uri) === id);
+  const newLikedState = !isCurrentlyLiked;
+
+  // 1. UI direct updaten (optimistic)
+  syncGlobalLikeUI(uri, newLikedState);
+
+  // 2. Local cache updaten
+  let newLikes;
+  if (newLikedState) {
+    newLikes = [...likes, { uri, id, meta }];
+  } else {
+    newLikes = likes.filter(l => window.getTrackId(l.uri) !== id);
+  }
+  if (typeof setLikes === "function") setLikes(newLikes);
+
+  // 3. Database updaten
+  try {
+    if (newLikedState) {
+      await fetch("/api/user/likes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ track: { uri, id, meta } })
+      });
+    } else {
+      await fetch(`/api/user/likes/${id}`, { method: "DELETE" });
+    }
+  } catch (err) {
+    console.error("Fout bij opslaan like in DB:", err);
+  }
+
+  return newLikedState;
+}
+
+// likes syncen
+function syncGlobalLikeUI(uri, isLiked) {
+  if (typeof window.getTrackId !== "function") return;
+  const targetId = window.getTrackId(uri);
+  // rij aanpassen
+  document.querySelectorAll(`.track-row[data-uri]`).forEach((row) => {
+    if (row.dataset.uri && window.getTrackId(row.dataset.uri) === targetId) {
+      const btn = row.querySelector(".track-like-btn");
+      if (btn) btn.classList.toggle("liked", isLiked);
+    }
+  });
+  // player bar like
+  const current = getStoredCurrentTrack();
+  if (current?.uri && window.getTrackId(current.uri) === targetId) {
+    const playerLikeBtn = document.getElementById("like-btn");
+    if (playerLikeBtn) playerLikeBtn.classList.toggle("liked", isLiked);
+  }
+  const pageDetail = document.getElementById("page-detail");
+  if (pageDetail) {
+    const detailLikeBtn = pageDetail.querySelector(".detail-like-btn");
+    if (
+        detailLikeBtn &&
+        detailLikeBtn.dataset.uri &&
+        window.getTrackId(detailLikeBtn.dataset.uri) === targetId
+    ) {
+        detailLikeBtn.classList.toggle("liked", isLiked);
+        detailLikeBtn.textContent = isLiked ? "geliket" : "like";
+    }
+  }
+  const pageLikes = document.getElementById("page-likes");
+  if (pageLikes && pageLikes.style.display !== "none") {
+    updateLikesPage();
+  }
+}
+// gelikete nummers tonen
+function updateLikesPage() {
+  const container = document.getElementById("likes-resultaten");
+  if (!container) return;
+  let likes = getLikes();
+  // dubbelchecken
+  const uniqueLikes = [];
+  const seenIds = new Set();
+  for (let i = 0; i < likes.length; i++) {
+    const item = likes[i];
+    const id = window.getTrackId(item.uri);
+    if (!seenIds.has(id)) {
+      seenIds.add(id);
+      uniqueLikes.push(item);
+    }
+  }
+  if (uniqueLikes.length !== likes.length) {
+    likes = uniqueLikes;
+    setLikes(likes);
+  }
+  if (likes.length === 0) {
+    container.innerHTML = `<div class="empty-state">je hebt nog niks geliket.</div>`;
+    return;
+  }
+  let rowsHtml = "";
+  for (let i = 0; i < likes.length; i++) {
+    const item = likes[i];
+    rowsHtml += renderTrackRow(
+      item.meta.image,
+      item.meta.name,
+      item.meta.artist,
+      "Nummer",
+      item.uri,
+      true,
+      item.meta.artistUri,
+    );
+  }
+  container.innerHTML = rowsHtml;
+  attachRowListeners(container);
+}
+
+function attachRowListeners(container) {
+  if (!container) return;
+  // likes instellen
+  const likeBtns = container.querySelectorAll(".track-like-btn");
+  likeBtns.forEach((btn) => {
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const row = btn.closest(".track-row");
+      if (!row || !row.dataset.uri) return;
+      const isNowLiked = await toggleGlobalLike(row.dataset.uri, {
+        name: row.dataset.name,
+        artist: row.dataset.artist,
+        artistUri: row.dataset.artistUri,
+        image: row.dataset.image,
+      });
+      if (isNowLiked) btn.classList.add("liked");
+      else btn.classList.remove("liked");
+    });
+  });
+  // follow artist
+  const followBtns = container.querySelectorAll(".track-follow-btn");
+  followBtns.forEach((btn) => {
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      const row = btn.closest(".track-row");
+      const artistUri = row?.dataset.artistUri;
+      if (artistUri) {
+          const artistId = window.getTrackId(artistUri);
+          if (typeof spotifyFollowArtist === "function") {
+              const ok = await spotifyFollowArtist(artistId);
+              if (ok) {
+                  btn.textContent = "Gevolgd";
+                  btn.style.background = "var(--surface)";
+                  btn.style.border = "1px solid var(--border)";
+              }
+          }
+      }
+    });
+  });
+  // playlist menu / verwijderen
+  const addBtns = container.querySelectorAll(".track-add-btn");
+  addBtns.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const row = btn.closest(".track-row");
+      if (!row) return;
+      
+      const trackUri = row.dataset.uri;
+      const isRemove = btn.classList.contains("remove-btn");
+      
+      if (isRemove) {
+          const playlistPage = document.getElementById("page-playlist");
+          const playlistId = playlistPage?.dataset.currentId;
+          if (playlistId && trackUri) {
+              if (typeof removeTrackFromPlaylist === "function") {
+                  removeTrackFromPlaylist(playlistId, trackUri);
+              }
+          }
+          return;
+      }
+
+      if (typeof showPlaylistMenu === "function") {
+        showPlaylistMenu(e, {
+          uri: trackUri,
+          meta: {
+            name: row.dataset.name,
+            artist: row.dataset.artist,
+            artistUri: row.dataset.artistUri,
+            image: row.dataset.image,
+          },
+        });
+      }
+    });
+  });
+  const rows = container.querySelectorAll(".track-row");
+  rows.forEach((row) => {
+    row.addEventListener("click", (e) => {
+      const type = row.dataset.type;
+      const uri = row.dataset.uri;
+      const target = e.target;
+      // op de titel drukken -> naar detailpagina
+      if (target.closest(".track-title-link")) {
+        e.stopPropagation();
+        if (typeof showDetailPage === "function") {
+          showDetailPage((uri || row.dataset.artistUri) || "", "track");
+        }
+        return;
+      }
+      if (target.closest(".track-artist-link")) {
+        e.stopPropagation();
+        const aUri = row.dataset.artistUri;
+        if (aUri && typeof showDetailPage === "function") {
+          showDetailPage(aUri, "artist");
+        }
+        return;
+      }
+      if (
+        target.closest(".track-like-btn") ||
+        target.closest(".track-add-btn")
+      ) {
+        return;
+      }
+      if (type === "Nummer" && uri) {
+        const allRows = Array.from(
+          container.querySelectorAll(".track-row[data-type='Nummer']"),
+        );
+        const startIndex = allRows.indexOf(row);
+        const queueUris = [];
+        if (startIndex !== -1) {
+          for (let i = startIndex; i < allRows.length; i++) {
+            if (allRows[i].dataset.uri) queueUris.push(allRows[i].dataset.uri);
+          }
+        } else {
+          queueUris.push(uri);
+        }
+        if (typeof playSong === "function") {
+          playSong(queueUris, {
+            name: row.dataset.name,
+            artist: row.dataset.artist,
+            artistUri: row.dataset.artistUri,
+            image: row.dataset.image,
+          });
+        }
+        return;
+      }
+      if (type === "Artiest") {
+        if (typeof showDetailPage === "function") {
+          showDetailPage((row.dataset.artistUri || uri) || "", "artist");
+        }
+      }
+    });
+  });
+}

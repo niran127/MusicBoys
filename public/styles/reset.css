@@ -1,0 +1,61 @@
+/* 1. Alles op nul zetten */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box; /* Zorgt dat padding de breedte niet verpest */
+    font-size: 100%;
+    font-family: inherit;
+    vertical-align: baseline;
+    border: 0;
+}
+
+/* 2. HTML5 elementen goed zetten voor oudere browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+    display: block;
+}
+
+/* 3. Body instellingen */
+body {
+    line-height: 1;
+    min-height: 100vh;
+    text-rendering: optimizeSpeed;
+}
+
+/* 4. Lijsten (jouw header logo!) */
+ol, ul {
+    list-style: none;
+}
+
+/* 5. Quotes en tabellen */
+blockquote, q {
+    quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+    content: '';
+    content: none;
+}
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+/* 6. Afbeeldingen (voorkomt rare witruimte onderaan) */
+img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+/* 7. Inputs en buttons (standaard lelijke styling weg) */
+input, button, textarea, select {
+    font: inherit;
+}
+ul, li {
+    list-style-type: none; /* Verwijdert de puntjes */
+    margin: 0;             /* Verwijdert de ruimte aan de linkerkant */
+    padding: 0;            /* Verwijdert de extra inspringing */
+}
