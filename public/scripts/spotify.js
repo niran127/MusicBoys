@@ -33,7 +33,7 @@ async function spotifyLogin() {
     new URLSearchParams({
       client_id: SP_CLIENT_ID,
       response_type: "code",
-      redirect_uri: SP_REDIRECT_URI,
+      redirect_uri: REDIRECT_URI,
       scope: SP_SCOPES,
       code_challenge_method: "S256",
       code_challenge: challenge,
@@ -52,7 +52,7 @@ async function exchangeCode(code) {
         client_id: SP_CLIENT_ID,
         grant_type: "authorization_code",
         code,
-        redirect_uri: SP_REDIRECT_URI,
+        redirect_uri: REDIRECT_URI,
         code_verifier: localStorage.getItem("sp_pkce"),
       }),
     });
