@@ -1,7 +1,7 @@
 const SP_CLIENT_ID = window.SP_CLIENT_ID;
 const REDIRECT_URI = window.REDIRECT_URI;
 const SP_SCOPES =
-  "streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state";
+  "streaming user-read-email user-read-private user-modify-playback-state user-read-playback-state user-follow-modify user-follow-read";
 const VOLUME_LIMIT = 0.5;
 
 // pkce helpers

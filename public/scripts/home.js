@@ -12,7 +12,7 @@ function setGreeting(name = null) {
   } else {
     greeting = "Goedenavond";
   }
-  
+
   if (name) {
     greetingEl.innerHTML = `${greeting}, <span>${name}</span>`;
     const userNameEl = document.getElementById("user-name");
@@ -28,16 +28,16 @@ function setGreeting(name = null) {
 async function initUserData() {
   try {
     const [likesRes, artistsRes] = await Promise.all([
-        fetch("/api/user/likes"),
-        fetch("/api/user/artists")
+      fetch("/api/user/likes"),
+      fetch("/api/user/artists"),
     ]);
     if (likesRes.ok) {
-        const likes = await likesRes.json();
-        if (typeof setLikes === "function") setLikes(likes);
+      const likes = await likesRes.json();
+      if (typeof setLikes === "function") setLikes(likes);
     }
     if (artistsRes.ok) {
-        const artists = await artistsRes.json();
-        if (typeof setFollowedArtists === "function") setFollowedArtists(artists);
+      const artists = await artistsRes.json();
+      if (typeof setFollowedArtists === "function") setFollowedArtists(artists);
     }
   } catch (err) {
     console.error("Fout bij synchroniseren gebruikersdata:", err);
@@ -64,28 +64,28 @@ async function initUserData() {
 // Cookie helpers
 function setCookie(name, value, days = 7) {
   const d = new Date();
-  d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+  d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
   const expires = "expires=" + d.toUTCString();
   document.cookie = name + "=" + value + ";" + expires + ";path=/";
 }
 
 function getCookie(name) {
   const nameEQ = name + "=";
-  const ca = document.cookie.split(';');
+  const ca = document.cookie.split(";");
   for (let i = 0; i < ca.length; i++) {
     let c = ca[i];
-    while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+    while (c.charAt(0) == " ") c = c.substring(1, c.length);
     if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
   }
   return null;
 }
 
 const moodGenres = {
-  "Chill": ["chill", "acoustic", "ambient"],
-  "Focus": ["classical", "study", "piano"],
-  "Party": ["edm", "party", "dance"],
-  "Sad": ["sad", "blues", "soul"],
-  "Workout": ["work-out", "rock", "heavy-metal"]
+  Chill: ["chill", "acoustic", "ambient"],
+  Focus: ["classical", "study", "piano"],
+  Party: ["edm", "party", "dance"],
+  Sad: ["sad", "blues", "soul"],
+  Workout: ["work-out", "rock", "heavy-metal"],
 };
 
 async function handleMoodGeneration() {
@@ -96,87 +96,63 @@ async function handleMoodGeneration() {
 
   try {
     const token = await getAuthToken();
-    const likes = typeof getLikes === "function" ? getLikes() : [];
-    const seedTracks = likes.slice(0, 2).map(l => l.id);
+    const query = genres[0];
 
-    let url = `https://api.spotify.com/v1/recommendations?limit=20&seed_genres=${genres.slice(0, 3).join(",")}`;
-    if (seedTracks.length > 0) {
-      url += `&seed_tracks=${seedTracks.join(",")}`;
+    const offset = Math.floor(Math.random() * 50);
+    let res = await fetch(
+      `https://api.spotify.com/v1/search?q=${query}&type=track&limit=20&offset=${offset}&market=BE`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    let data = await res.json();
+    let tracks = data.tracks?.items || [];
+
+    if (tracks.length === 0) {
+      res = await fetch(
+        `https://api.spotify.com/v1/search?q=${query}&type=track&limit=20&market=BE`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      data = await res.json();
+      tracks = data.tracks?.items || [];
     }
 
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const data = await res.json();
+    if (tracks.length === 0) {
+      console.error("Geen nummers gevonden voor mood:", mood);
+      return;
+    }
 
-    if (data.tracks) {
-      const list = document.getElementById("generator-list");
-      const results = document.getElementById("generator-results");
-      if (list && results) {
-        list.innerHTML = "";
-        data.tracks.forEach(t => {
-          const isLiked = likes.some(l => window.getTrackId(l.uri) === t.id);
-          list.innerHTML += renderTrackRow(
-            t.album.images?.[0]?.url,
-            t.name,
-            t.artists[0].name,
-            "Nummer",
-            t.uri,
-            isLiked,
-            t.artists[0].uri
-          );
-        });
-        
-        // Knop toevoegen om deze mix op te slaan als playlist
-        const saveBtnId = "save-mood-mix";
-        let saveBtn = document.getElementById(saveBtnId);
-        if (!saveBtn) {
-          saveBtn = document.createElement("button");
-          saveBtn.id = saveBtnId;
-          saveBtn.className = "btn btn-primary";
-          saveBtn.style.marginTop = "20px";
-          saveBtn.textContent = "DEZE MIX OPSLAAN ALS PLAYLIST";
-          results.appendChild(saveBtn);
-        }
-        
-        saveBtn.onclick = async () => {
-          saveBtn.textContent = "OPSLAAN...";
-          const trackData = data.tracks.map(t => ({
-              uri: t.uri,
-              id: t.id,
-              meta: {
-                  name: t.name,
-                  artist: t.artists[0].name,
-                  image: t.album.images?.[0]?.url,
-                  artistUri: t.artists[0].uri
-              }
-          }));
-          
-          try {
-              const createRes = await fetch("/api/playlists", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ 
-                      name: `Mijn ${mood} Mix`, 
-                      description: `Gegenereerd op basis van ${mood} mood.`,
-                      tracks: trackData
-                  })
-              });
-              if (createRes.ok) {
-                  const p = await createRes.json();
-                  saveBtn.textContent = "GEDAAN!";
-                  if (typeof renderCustomPlaylists === "function") renderCustomPlaylists();
-                  if (typeof showPage === "function") showPage("playlist", { id: p._id, name: p.name });
-              }
-          } catch (err) {
-              console.error("Fout bij opslaan mood mix:", err);
-              saveBtn.textContent = "FOUT BIJ OPSLAAN";
-          }
-        };
-        
-        results.style.display = "block";
-        if (typeof attachRowListeners === "function") attachRowListeners(list);
-      }
+    const playlistsRes = await fetch("/api/user/playlists");
+    const playlists = await playlistsRes.json();
+    const moodCount = playlists.filter((p) =>
+      p.name.startsWith(`Jouw ${mood} Mix`),
+    ).length;
+    const playlistName = `Jouw ${mood} Mix #${moodCount + 1}`;
+
+    const trackData = tracks.map((t) => ({
+      uri: t.uri,
+      id: t.id,
+      meta: {
+        name: t.name,
+        artist: t.artists[0].name,
+        image: t.album.images?.[0]?.url,
+        artistUri: t.artists[0].uri,
+      },
+    }));
+
+    const createRes = await fetch("/api/playlists", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: playlistName,
+        description: `Gegenereerd op basis van ${mood} mood.`,
+        tracks: trackData,
+      }),
+    });
+
+    if (createRes.ok) {
+      const p = await createRes.json();
+      if (typeof renderCustomPlaylists === "function") renderCustomPlaylists();
+      if (typeof showPage === "function")
+        showPage("playlist", { id: p._id, name: p.name });
     }
   } catch (err) {
     console.error("Fout bij genereren mood playlist:", err);
@@ -191,7 +167,7 @@ const sidebarMood = document.getElementById("sidebar-mood");
 
 function selectMood(mood, chip = null) {
   if (!chip) {
-      chip = Array.from(moods).find(m => m.dataset.mood === mood);
+    chip = Array.from(moods).find((m) => m.dataset.mood === mood);
   }
   if (!chip) return;
 
@@ -204,14 +180,16 @@ function selectMood(mood, chip = null) {
   setCookie("user_mood", mood);
 
   // Update theme
-  document.body.className = document.body.className.replace(/theme-\w+/g, "").trim();
+  document.body.className = document.body.className
+    .replace(/theme-\w+/g, "")
+    .trim();
   document.body.classList.add(`theme-${mood.toLowerCase()}`);
 
   // Update text
   const currentMoodText = document.getElementById("current-mood-text");
   if (currentMoodText) currentMoodText.textContent = mood;
   if (sidebarMood) sidebarMood.textContent = mood;
-  
+
   const mobileMood = document.getElementById("mobile-mood");
   if (mobileMood) mobileMood.textContent = mood;
 }
@@ -226,10 +204,12 @@ for (let i = 0; i < moods.length; i++) {
 // Init mood from cookie
 const savedMood = getCookie("user_mood");
 if (savedMood) {
-    selectMood(savedMood);
+  selectMood(savedMood);
 }
 
-document.getElementById("generate-mood-playlist")?.addEventListener("click", handleMoodGeneration);
+document
+  .getElementById("generate-mood-playlist")
+  ?.addEventListener("click", handleMoodGeneration);
 
 // navigatie
 document
@@ -252,7 +232,7 @@ document
   ?.addEventListener("click", () => showPage("likes"));
 
 if (typeof renderCustomPlaylists === "function") {
-    renderCustomPlaylists();
+  renderCustomPlaylists();
 }
 
 // details vanuit player

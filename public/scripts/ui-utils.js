@@ -16,7 +16,8 @@ function renderTrackRow(
     trackUri && isTrack
       ? `data-uri="${trackUri}" data-name="${eName}" data-artist="${eArtistMeta}" data-image="${imageUrl || ""}" data-type="${type}" ${artistUri ? `data-artist-uri="${artistUri}"` : ""}`
       : `data-type="${type}" ${artistUri ? `data-artist-uri="${artistUri}"` : ""}`;
-  const isOnPlaylist = document.getElementById("page-playlist")?.style.display !== "none" || false;
+  const isOnPlaylist =
+    document.getElementById("page-playlist")?.style.display !== "none" || false;
   const isRemove = isOnPlaylist && isTrack;
 
   const playIcon =
@@ -44,12 +45,15 @@ function renderTrackRow(
         <div class="track-artist"><span class="track-artist-link">${subtitle}</span></div>
       </div>
       <span class="track-type-badge">${type}</span>
-      ${isTrack ? `
+      ${
+        isTrack
+          ? `
       <button class="track-add-btn ${isRemove ? "remove-btn" : ""}" title="${isRemove ? "verwijderen" : "toevoegen"}">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          ${isRemove 
-            ? `<line x1="5" y1="12" x2="19" y2="12"></line>` 
-            : `<line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>`
+          ${
+            isRemove
+              ? `<line x1="5" y1="12" x2="19" y2="12"></line>`
+              : `<line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>`
           }
         </svg>
       </button>
@@ -58,11 +62,13 @@ function renderTrackRow(
           <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
         </svg>
       </button>
-      ` : `
-      <button class="track-follow-btn" title="volgen" style="background: var(--accent); color: white; border: none; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; cursor: pointer;">
+      `
+          : `
+      <button class="track-follow-placeholder" title="volgen" style="background: var(--accent); color: white; border: none; padding: 4px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; cursor: pointer;">
         Volgen
       </button>
-      `}
+      `
+      }
     </div>
   `;
 }
@@ -71,7 +77,7 @@ async function toggleGlobalLike(uri, meta) {
   if (typeof window.getTrackId !== "function") return false;
   const id = window.getTrackId(uri);
   const likes = typeof getLikes === "function" ? getLikes() : [];
-  const isCurrentlyLiked = likes.some(l => window.getTrackId(l.uri) === id);
+  const isCurrentlyLiked = likes.some((l) => window.getTrackId(l.uri) === id);
   const newLikedState = !isCurrentlyLiked;
 
   // 1. UI direct updaten (optimistic)
@@ -82,7 +88,7 @@ async function toggleGlobalLike(uri, meta) {
   if (newLikedState) {
     newLikes = [...likes, { uri, id, meta }];
   } else {
-    newLikes = likes.filter(l => window.getTrackId(l.uri) !== id);
+    newLikes = likes.filter((l) => window.getTrackId(l.uri) !== id);
   }
   if (typeof setLikes === "function") setLikes(newLikes);
 
@@ -92,7 +98,7 @@ async function toggleGlobalLike(uri, meta) {
       await fetch("/api/user/likes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ track: { uri, id, meta } })
+        body: JSON.stringify({ track: { uri, id, meta } }),
       });
     } else {
       await fetch(`/api/user/likes/${id}`, { method: "DELETE" });
@@ -125,12 +131,12 @@ function syncGlobalLikeUI(uri, isLiked) {
   if (pageDetail) {
     const detailLikeBtn = pageDetail.querySelector(".detail-like-btn");
     if (
-        detailLikeBtn &&
-        detailLikeBtn.dataset.uri &&
-        window.getTrackId(detailLikeBtn.dataset.uri) === targetId
+      detailLikeBtn &&
+      detailLikeBtn.dataset.uri &&
+      window.getTrackId(detailLikeBtn.dataset.uri) === targetId
     ) {
-        detailLikeBtn.classList.toggle("liked", isLiked);
-        detailLikeBtn.textContent = isLiked ? "geliket" : "like";
+      detailLikeBtn.classList.toggle("liked", isLiked);
+      detailLikeBtn.textContent = isLiked ? "geliket" : "like";
     }
   }
   const pageLikes = document.getElementById("page-likes");
@@ -206,15 +212,15 @@ function attachRowListeners(container) {
       const row = btn.closest(".track-row");
       const artistUri = row?.dataset.artistUri;
       if (artistUri) {
-          const artistId = window.getTrackId(artistUri);
-          if (typeof spotifyFollowArtist === "function") {
-              const ok = await spotifyFollowArtist(artistId);
-              if (ok) {
-                  btn.textContent = "Gevolgd";
-                  btn.style.background = "var(--surface)";
-                  btn.style.border = "1px solid var(--border)";
-              }
+        const artistId = window.getTrackId(artistUri);
+        if (typeof spotifyFollowArtist === "function") {
+          const ok = await spotifyFollowArtist(artistId);
+          if (ok) {
+            btn.textContent = "Gevolgd";
+            btn.style.background = "var(--surface)";
+            btn.style.border = "1px solid var(--border)";
           }
+        }
       }
     });
   });
@@ -225,19 +231,23 @@ function attachRowListeners(container) {
       e.stopPropagation();
       const row = btn.closest(".track-row");
       if (!row) return;
-      
+
       const trackUri = row.dataset.uri;
       const isRemove = btn.classList.contains("remove-btn");
-      
+
       if (isRemove) {
-          const playlistPage = document.getElementById("page-playlist");
-          const playlistId = playlistPage?.dataset.currentId;
-          if (playlistId && trackUri) {
-              if (typeof removeTrackFromPlaylist === "function") {
-                  removeTrackFromPlaylist(playlistId, trackUri);
-              }
-          }
-          return;
+        if (typeof showPlaylistMenu === "function") {
+          showPlaylistMenu(e, {
+            uri: trackUri,
+            meta: {
+              name: row.dataset.name,
+              artist: row.dataset.artist,
+              artistUri: row.dataset.artistUri,
+              image: row.dataset.image,
+            },
+          });
+        }
+        return;
       }
 
       if (typeof showPlaylistMenu === "function") {
@@ -263,7 +273,7 @@ function attachRowListeners(container) {
       if (target.closest(".track-title-link")) {
         e.stopPropagation();
         if (typeof showDetailPage === "function") {
-          showDetailPage((uri || row.dataset.artistUri) || "", "track");
+          showDetailPage(uri || row.dataset.artistUri || "", "track");
         }
         return;
       }
@@ -306,9 +316,21 @@ function attachRowListeners(container) {
       }
       if (type === "Artiest") {
         if (typeof showDetailPage === "function") {
-          showDetailPage((row.dataset.artistUri || uri) || "", "artist");
+          showDetailPage(row.dataset.artistUri || uri || "", "artist");
         }
       }
     });
   });
 }
+document
+  .getElementById("likes-artist-filter")
+  ?.addEventListener("input", function () {
+    const query = this.value.toLowerCase();
+    const rows = document.querySelectorAll("#likes-resultaten .track-row");
+    rows.forEach((row) => {
+      const name = (row.dataset.name || "").toLowerCase();
+      const artist = (row.dataset.artist || "").toLowerCase();
+      row.style.display =
+        name.includes(query) || artist.includes(query) ? "" : "none";
+    });
+  });

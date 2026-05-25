@@ -6,7 +6,7 @@
 
 .track-row {
   display: grid;
-  grid-template-columns: 44px 1fr auto auto auto;
+  grid-template-columns: 44px 1fr auto 32px 32px;
   align-items: center;
   gap: 16px;
   padding: 8px 16px;
@@ -35,7 +35,9 @@
   border-radius: 8px;
   background: var(--border);
   object-fit: cover;
-  transition: transform 0.2s, filter 0.2s;
+  transition:
+    transform 0.2s,
+    filter 0.2s;
 }
 
 .track-art-container:hover .track-art {
@@ -62,15 +64,29 @@
   opacity: 1;
 }
 
+.track-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .track-info .track-name {
   font-size: 0.88rem;
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .track-info .track-artist {
-  font-size: 0.76rem;
+  font-size: 0.68rem;
   color: var(--text-dim);
   margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .track-type-badge {
@@ -80,8 +96,11 @@
   text-transform: uppercase;
   color: var(--muted);
   background: var(--border);
-  padding: 3px 8px;
+  padding: 4px 8px;
   border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .track-like-btn {
@@ -145,7 +164,27 @@
   font-size: 0.88rem;
 }
 
-.track-title-link:hover, .track-artist-link:hover {
+.track-title-link:hover,
+.track-artist-link:hover {
   text-decoration: underline;
   color: var(--text) !important;
+}
+.track-follow-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+}
+
+.track-add-btn,
+.track-like-btn {
+  flex-shrink: 0;
+}
+.track-follow-placeholder {
+  width: 64px;
+}
+
+.track-follow-btn {
+  width: 64px;
+  text-align: center;
 }
