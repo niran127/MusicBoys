@@ -182,7 +182,6 @@ function initUserDropdown() {
 
   const toggle = (e) => {
     e.stopPropagation();
-    // Op mobiel: verplaats dropdown naar juiste positie
     const isMobile = window.innerWidth <= 768;
     if (isMobile) {
       dropdown.style.position = "fixed";
@@ -190,10 +189,10 @@ function initUserDropdown() {
       dropdown.style.right = "12px";
       dropdown.style.left = "auto";
     } else {
-      dropdown.style.position = "";
-      dropdown.style.top = "";
-      dropdown.style.right = "";
-      dropdown.style.left = "";
+      dropdown.style.position = "absolute";
+      dropdown.style.top = "110%";
+      dropdown.style.right = "0";
+      dropdown.style.left = "auto";
     }
     dropdown.classList.toggle("active");
   };
@@ -204,7 +203,7 @@ function initUserDropdown() {
   document.addEventListener("click", (e) => {
     if (
       !dropdown.contains(e.target) &&
-      e.target !== pill &&
+      !pill?.contains(e.target) &&
       !mobileUser?.contains(e.target)
     ) {
       dropdown.classList.remove("active");

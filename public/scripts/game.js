@@ -132,9 +132,7 @@ async function startNewRound() {
 
 async function loadRoundData() {
   try {
-    const res = await fetch(
-      `https://itunes.apple.com/search?term=pop&limit=50&entity=song&media=music`,
-    );
+    const res = await fetch(`/api/itunes/search?term=pop&limit=50`);
     const data = await res.json();
 
     if (!data || !data.results || data.results.length === 0) {

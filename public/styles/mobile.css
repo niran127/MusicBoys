@@ -5,15 +5,32 @@
 .mobile-header {
   display: none;
 }
+.mobile-header-user * {
+  pointer-events: none;
+}
+
+.mobile-header-user {
+  cursor: pointer;
+}
 
 @media (max-width: 768px) {
-
   body {
     grid-template-columns: 1fr;
     grid-template-rows: 52px 1fr;
     height: 100vh;
     height: 100dvh;
     overflow: hidden;
+  }
+
+  .auth-card {
+    padding: 30px 20px;
+    margin: 16px;
+    border-radius: 16px;
+    max-width: calc(100% - 32px);
+  }
+
+  .logo {
+    font-size: 0.9rem;
   }
 
   .mobile-header {
@@ -28,25 +45,27 @@
     z-index: 50;
   }
 
-  /* links: gekozen mood */
   .mobile-header-mood {
     justify-self: start;
     font-family: "Syne", sans-serif;
     font-size: 0.8rem;
     font-weight: 700;
     color: var(--accent2);
-    background: linear-gradient(135deg, rgba(124, 92, 252, 0.15), rgba(200, 109, 215, 0.1));
+    background: linear-gradient(
+      135deg,
+      rgba(124, 92, 252, 0.15),
+      rgba(200, 109, 215, 0.1)
+    );
     border: 1px solid rgba(124, 92, 252, 0.25);
     border-radius: 999px;
     padding: 4px 12px;
     white-space: nowrap;
   }
 
-  /* midden: logo */
   .mobile-header-logo {
     justify-self: center;
     font-family: "Syne", sans-serif;
-    font-size: 1.05rem;
+    font-size: 0.9rem;
     font-weight: 800;
     letter-spacing: -0.5px;
     background: linear-gradient(90deg, var(--accent), var(--accent2));
@@ -55,7 +74,6 @@
     -webkit-text-fill-color: transparent;
   }
 
-  /* rechts: user pfp */
   .mobile-header-user {
     justify-self: end;
   }
@@ -66,7 +84,6 @@
     font-size: 0.65rem;
   }
 
-  /* --- sidebar verbergen als sidebar, tonen als bottom bar --- */
   aside.sidebar {
     display: flex !important;
     flex-direction: row !important;
@@ -86,17 +103,14 @@
     overflow: visible;
   }
 
-  /* logo verbergen in aside */
   aside .logo {
     display: none !important;
   }
 
-  /* mood badge verbergen in aside (zit al in mobile-header) */
   aside .mood-badge {
     display: none !important;
   }
 
-  /* nav als horizontale balk */
   aside nav {
     display: flex !important;
     flex-direction: row !important;
@@ -106,21 +120,20 @@
     align-items: stretch;
   }
 
-  nav a{ text-decoration: none;}
+  nav a {
+    text-decoration: none;
+  }
 
-  /* nav labels verbergen */
   aside .nav-label {
     display: none !important;
   }
 
-  /* playlists sectie verbergen in bottom bar */
   aside #nav-new-playlist,
   aside #nav-likes,
   aside #custom-playlists-list {
     display: none !important;
   }
 
-  /* nav items: verticaal icoon + label */
   aside .nav-item {
     flex: 1;
     flex-direction: column;
@@ -148,11 +161,11 @@
     width: 28px;
     height: 28px;
   }
-  /* hide nav namen onder icons */
+
   aside.sidebar .nav-text {
     display: none;
   }
-  /* collectie tonen in bottom bar */
+
   aside .desktop-hidden {
     display: flex !important;
   }
@@ -163,7 +176,8 @@
     padding: 16px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: 160px; /* playerbar (~86px) + nav (~56px) + buffer */
+    padding-bottom: 160px;
+    margin-top: -15px;
   }
 
   #page-home,
@@ -174,9 +188,20 @@
     gap: 20px;
   }
 
+  #page-game {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    height: 100%;
+  }
+
   .greeting {
     display: none !important;
   }
+
   .user-pill {
     display: none !important;
   }
@@ -234,6 +259,7 @@
   footer:has(#now-name:empty) {
     display: none;
   }
+
   .player-info {
     grid-column: 1 / -1;
     display: flex;
@@ -259,6 +285,7 @@
   .like-btn {
     margin-left: auto;
   }
+
   .player-controls {
     grid-column: 1 / -1;
     width: 100%;
@@ -281,6 +308,7 @@
   .player-extra {
     display: none;
   }
+
   .search-bar {
     flex-direction: column;
     gap: 12px;
@@ -294,7 +322,7 @@
   }
 
   .search-input-wrap svg {
-    display: none; 
+    display: none;
   }
 
   .search-input-wrap form {
@@ -320,9 +348,9 @@
   }
 
   .track-row {
-    grid-template-columns: 40px 1fr auto;
-    gap: 10px;
-    padding: 6px 8px;
+    grid-template-columns: 40px 1fr auto auto;
+    gap: 8px;
+    padding: 4px 8px;
   }
 
   .track-type-badge {
@@ -377,6 +405,7 @@
 
   .detail-content {
     padding: 16px;
+    overflow-x: hidden;
   }
 
   .detail-close-btn {
@@ -407,47 +436,136 @@
     gap: 12px;
   }
 
+  .album-card {
+    min-width: 0;
+  }
+
+  .album-art-wrap {
+    width: 100%;
+    aspect-ratio: 1;
+  }
+
+  .album-art-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  .album-name {
+    font-size: 0.78rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .album-meta {
+    font-size: 0.7rem;
+  }
+
   .game-container {
+    margin: auto;
     padding: 20px;
-    border-radius: 16px;
+    border-radius: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 8px;
+    overflow: hidden;
+    text-align: center;
+    width: 100%;
+  }
+
+  .game-header {
+    margin-bottom: 0 !important;
   }
 
   .game-title {
-    font-size: 1.6rem;
+    font-size: 1.3rem;
+    margin-bottom: 2px;
+  }
+
+  .game-score {
+    font-size: 0.8rem;
+    margin-bottom: 12px;
+  }
+
+  .audio-visualizer {
+    height: 28px;
+    margin: 0;
+  }
+
+  .audio-visualizer .bar {
+    width: 4px;
+  }
+
+  .game-player-controls {
+    padding: 10px;
+    margin-bottom: 0;
+    width: 100%;
   }
 
   .options-grid {
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 12px !important;
+    gap: 6px !important;
+    flex: 1;
+    min-height: 0;
   }
 
   .option-btn {
-    padding: 12px !important;
-    font-size: 0.85rem !important;
-    min-height: 80px;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 60 !important;
+    padding: 4px 8px !important;
+    font-size: 0.78rem !important;
+    min-height: unset !important;
+    line-height: 1.2;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  #game-status {
+    font-size: 0.85rem;
+    min-height: unset;
+    margin-top: 0;
+  }
+
+  .next-btn {
+    padding: 10px !important;
+    margin-top: 0 !important;
+  }
+
+  .game-intro p {
+    font-size: 0.85rem;
+    line-height: 1.5;
   }
 
   .section-title {
     font-size: 0.68rem;
     margin-bottom: 10px;
   }
+
   ::-webkit-scrollbar {
     width: 3px;
   }
 
-  /* Collectie Pagina Tabs */
   #page-collectie {
     flex-direction: column;
   }
+
   .collectie-header {
     margin-bottom: 24px;
   }
+
   .collectie-tabs {
     display: flex;
-    gap: 20px;
+    gap: 10px;
     margin-top: 15px;
     border-bottom: 1px solid var(--border);
   }
+
   .collectie-tab {
     padding: 10px 0;
     font-size: 0.95rem;
@@ -456,9 +574,11 @@
     position: relative;
     cursor: pointer;
   }
+
   .collectie-tab.active {
     color: var(--text);
   }
+
   .collectie-tab.active::after {
     content: "";
     position: absolute;
@@ -468,20 +588,29 @@
     height: 2px;
     background: var(--accent);
   }
+
   .playlist-grid-mobile {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    gap: 8px;
+    margin: 12px 16px;
+    box-sizing: border-box;
+    width: calc(100% - 32px);
+    overflow: hidden;
   }
+
   .playlist-card-mobile {
     background: var(--card);
     border-radius: 12px;
     padding: 12px;
     border: 1px solid var(--border);
+    min-width: 0;
+    overflow: hidden;
   }
+
   .card-art {
     width: 100%;
-    aspect-ratio: 1;
+    aspect-ratio: 1 / 1;
     background: var(--surface);
     border-radius: 8px;
     display: flex;
@@ -490,6 +619,7 @@
     margin-bottom: 10px;
     overflow: hidden;
   }
+
   .card-name {
     font-size: 0.9rem;
     font-weight: 700;
@@ -497,10 +627,12 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
   .card-count {
     font-size: 0.75rem;
     color: var(--muted);
   }
+
   .create-card .card-art {
     border: 2px dashed var(--border);
     color: var(--accent);

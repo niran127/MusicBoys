@@ -11,8 +11,12 @@
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .topbar-left {
@@ -99,18 +103,21 @@
   border-radius: 12px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   padding: 8px;
-  display: none;
   z-index: 1000;
-  transform: translateY(-10px);
-  opacity: 0;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition:
+    opacity 0.2s,
+    transform 0.2s,
+    visibility 0.2s;
 }
 
 .user-dropdown.active {
-  display: block;
-  transform: translateY(0);
   opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
   pointer-events: all;
 }
 
@@ -175,7 +182,10 @@
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s, border-color 0.2s, color 0.2s;
+  transition:
+    transform 0.2s,
+    border-color 0.2s,
+    color 0.2s;
   color: var(--text-dim);
   background: var(--card);
   letter-spacing: 0.04em;
@@ -210,7 +220,10 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
   position: relative;
   overflow: hidden;
 }
@@ -261,7 +274,9 @@
 
 .action-arrow {
   color: var(--muted);
-  transition: transform 0.2s, color 0.2s;
+  transition:
+    transform 0.2s,
+    color 0.2s;
 }
 
 .action-card:hover .action-arrow {

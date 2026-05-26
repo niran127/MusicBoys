@@ -162,7 +162,7 @@
             </div>
       </aside>
       <main>
-         <div class="global-header" style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+         <div class="global-header" style="display: flex; position: relative; justify-content: flex-end;">
             <div class="user-pill" id="user-pill" style="position: relative; cursor: pointer;">
                <div class="avatar" id="user-avatar" style="overflow: hidden;">
                   <% if (user.profileImageUrl) { %>
@@ -175,7 +175,7 @@
                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                   <polyline points="6 9 12 15 18 9" />
                </svg>
-               <div class="user-dropdown" id="user-dropdown" style="display: none; position: absolute; top: 110%; right: 0; background: var(--card); border: 1px solid var(--border); border-radius: 12px; min-width: 180px; padding: 8px; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.3); backdrop-filter: blur(10px);">
+               <div class="user-dropdown" id="user-dropdown" style="position: absolute; top: 110%; right: 0; background: var(--card); border: 1px solid var(--border); border-radius: 12px; min-width: 180px; padding: 8px; z-index: 100; box-shadow: 0 10px 25px rgba(0,0,0,0.3); backdrop-filter: blur(10px);">
                   <div class="dropdown-item" id="change-photo-btn">
                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                      <span>Avatar aanpassen</span>
@@ -322,7 +322,7 @@
                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                         <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                      </svg>
-                     <input id="zoekVeld" type="text" placeholder="Zoek naar artiesten of nummers ..." style="background-color: var(--card)" autocomplete="off" />
+                     <input id="zoekVeld" type="text" placeholder="Zoek naar artiesten of nummers ..." style="border-radius:13px; background-color: var(--card)" autocomplete="off" />
                   </div>
                   <button id="zoekKnop" class="search-btn">Zoeken</button>
                </div>
@@ -407,8 +407,7 @@
             <section><div id="playlist-resultaten" class="tracks-list"></div></section>
          </div>
          <div id="page-detail" style="display: none"></div>
-         <div id="page-game" style="display: none; min-height: calc(100vh - 160px); padding: 40px 20px;">
-            <!-- Content wordt dynamisch gegenereerd door game.js -->
+         <div id="page-game" style="display: none;">
             <div id="game-start-screen">
                 <p style="color: var(--muted); margin-bottom: 30px;">Hoor een korte preview en raad de titel. Hoeveel heb jij er goed?</p>
                 <button id="start-game-btn" class="btn btn-primary" style="width: 100%; padding: 16px; font-size: 1.1rem;">START SPEL</button>
